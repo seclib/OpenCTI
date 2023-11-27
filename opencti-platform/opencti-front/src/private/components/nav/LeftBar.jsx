@@ -67,6 +67,7 @@ import {
   HexagonOutline,
   LaptopAccount,
   LockPattern,
+  PiggyBank,
   ProgressWrench,
   ServerNetwork,
   ShieldSearch,
@@ -307,6 +308,7 @@ const LeftBar = () => {
   const hideObservations = useIsHiddenEntities(
     'Stix-Cyber-Observable',
     'Artifact',
+    'Financial-Data',
     'Indicator',
     'Infrastructure',
   );
@@ -607,6 +609,7 @@ const LeftBar = () => {
               [
                 { type: 'Stix-Cyber-Observable', link: '/dashboard/observations/observables', label: 'Observables', icon: <HexagonOutline fontSize="small" /> },
                 { type: 'Artifact', link: '/dashboard/observations/artifacts', label: 'Artifacts', icon: <ArchiveOutline fontSize="small" /> },
+                { type: 'Financial-Data', link: '/dashboard/observations/financial-data', label: 'Financial Data', icon: <PiggyBank /> },
                 { type: 'Indicator', link: '/dashboard/observations/indicators', label: 'Indicators', icon: <ShieldSearch fontSize="small" /> },
                 { type: 'Infrastructure', link: '/dashboard/observations/infrastructures', label: 'Infrastructures', icon: <ServerNetwork fontSize="small" /> },
               ],
