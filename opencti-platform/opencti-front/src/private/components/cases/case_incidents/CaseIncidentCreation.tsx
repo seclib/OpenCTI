@@ -8,7 +8,7 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
-import { MESSAGING$, handleErrorInForm } from 'src/relay/environment';
+import { handleErrorInForm } from 'src/relay/environment';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import DateTimePickerField from '../../../../components/DateTimePickerField';
@@ -119,7 +119,11 @@ export const CaseIncidentCreationForm: FunctionComponent<IncidentFormProps> = ({
     CASE_INCIDENT_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation<CaseIncidentCreationCaseMutation>(caseIncidentMutation);
+  const [commit] = useApiMutation<CaseIncidentCreationCaseMutation>(
+    caseIncidentMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Case-Incident')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<FormikCaseIncidentAddInput>['onSubmit'] = (
     values,
     { setSubmitting, setErrors, resetForm },
@@ -153,7 +157,6 @@ export const CaseIncidentCreationForm: FunctionComponent<IncidentFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: (response) => {
@@ -162,7 +165,6 @@ export const CaseIncidentCreationForm: FunctionComponent<IncidentFormProps> = ({
         if (onClose) {
           onClose();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Case-Incident')} ${t_i18n('successfully created')}`);
         if (mapAfter) {
           if (contentMappingFeatureFlag) {
             navigate(

@@ -8,6 +8,9 @@ import { graphql } from 'react-relay';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { handleErrorInForm } from 'src/relay/environment';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import DateTimePickerField from '../../../../components/DateTimePickerField';
 import { useFormatter } from '../../../../components/i18n';
 import MarkdownField from '../../../../components/fields/MarkdownField';
@@ -115,11 +118,15 @@ export const CaseRftCreationForm: FunctionComponent<CaseRftFormProps> = ({
     CASE_RFT_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation<CaseRftCreationCaseMutation>(caseRftMutation);
+  const [commit] = useApiMutation<CaseRftCreationCaseMutation>(
+    caseRftMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Case-Rft')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<FormikCaseRftAddInput>['onSubmit'] = (
     values,
-    { setSubmitting, resetForm },
+    { setSubmitting, setErrors, resetForm },
   ) => {
     const input: CaseRftAddInput = {
       name: values.name,
@@ -147,6 +154,10 @@ export const CaseRftCreationForm: FunctionComponent<CaseRftFormProps> = ({
         if (updater && response) {
           updater(store, 'caseRftAdd', response.caseRftAdd);
         }
+      },
+      onError: (error) => {
+        handleErrorInForm(error, setErrors);
+        setSubmitting(false);
       },
       onCompleted: (response) => {
         setSubmitting(false);
@@ -341,16 +352,20 @@ const CaseRftCreation = ({
   paginationOptions: CaseRftLinesCasesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_case_caseRfts',
     paginationOptions,
     'caseRftAdd',
   );
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+
   return (
     <Drawer
       title={t_i18n('Create a request for takedown')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Case-Rft') : undefined}
     >
       <CaseRftCreationForm updater={updater} />
     </Drawer>

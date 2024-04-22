@@ -8,7 +8,7 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
-import { MESSAGING$, handleErrorInForm } from 'src/relay/environment';
+import { handleErrorInForm } from 'src/relay/environment';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import DateTimePickerField from '../../../../components/DateTimePickerField';
@@ -117,7 +117,11 @@ export const CaseRfiCreationForm: FunctionComponent<CaseRfiFormProps> = ({
     CASE_RFI_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation<CaseRfiCreationCaseMutation>(caseRfiMutation);
+  const [commit] = useApiMutation<CaseRfiCreationCaseMutation>(
+    caseRfiMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Case-Rfi')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<FormikCaseRfiAddInput>['onSubmit'] = (
     values,
     { setSubmitting, setErrors, resetForm },
@@ -151,7 +155,6 @@ export const CaseRfiCreationForm: FunctionComponent<CaseRfiFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: (response) => {
@@ -160,7 +163,6 @@ export const CaseRfiCreationForm: FunctionComponent<CaseRfiFormProps> = ({
         if (onClose) {
           onClose();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Case-Rfi')} ${t_i18n('successfully created')}`);
         if (mapAfter) {
           if (contentMappingFeatureFlag) {
             navigate(
