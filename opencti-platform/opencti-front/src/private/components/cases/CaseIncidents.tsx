@@ -1,4 +1,5 @@
 import React, { FunctionComponent } from 'react';
+import useHelper from 'src/utils/hooks/useHelper';
 import ListLines from '../../../components/list_lines/ListLines';
 import { usePaginationLocalStorage } from '../../../utils/hooks/useLocalStorage';
 import useQueryLoading from '../../../utils/hooks/useQueryLoading';
@@ -19,7 +20,6 @@ import { CaseIncidentLineCase_node$data } from './case_incidents/__generated__/C
 import { useBuildEntityTypeBasedFilterContext, emptyFilterGroup } from '../../../utils/filters/filtersUtils';
 import { useFormatter } from '../../../components/i18n';
 import Breadcrumbs from '../../../components/Breadcrumbs';
-import useHelper from 'src/utils/hooks/useHelper';
 
 interface CaseIncidentsProps {
   inputValue?: string;
@@ -47,6 +47,7 @@ const CaseIncidents: FunctionComponent<CaseIncidentsProps> = () => {
       filters: emptyFilterGroup,
     },
   );
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
 
   const {
     sortBy,
@@ -150,7 +151,7 @@ const CaseIncidents: FunctionComponent<CaseIncidentsProps> = () => {
         paginationOptions={queryPaginationOptions}
         numberOfElements={numberOfElements}
         iconExtension={true}
-        createButton={isFeatureEnable("FAB_REPLACEMENT") && <Security needs={[KNOWLEDGE_KNUPDATE]}>
+        createButton={FABReplaced && <Security needs={[KNOWLEDGE_KNUPDATE]}>
           <CaseIncidentCreation paginationOptions={queryPaginationOptions} />
         </Security>}
       >
@@ -197,8 +198,8 @@ const CaseIncidents: FunctionComponent<CaseIncidentsProps> = () => {
     <ExportContextProvider>
       <Breadcrumbs variant="list" elements={[{ label: t_i18n('Cases') }, { label: t_i18n('Incident responses'), current: true }]} />
       {renderLines()}
-      {!isFeatureEnable('FAB_REPLACEMENT') &&
-        <Security needs={[KNOWLEDGE_KNUPDATE]}>
+      {!FABReplaced
+        && <Security needs={[KNOWLEDGE_KNUPDATE]}>
           <CaseIncidentCreation paginationOptions={queryPaginationOptions} />
         </Security>
       }
