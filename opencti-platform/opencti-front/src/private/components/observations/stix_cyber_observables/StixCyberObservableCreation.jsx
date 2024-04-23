@@ -18,7 +18,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { ListItemButton } from '@mui/material';
 import useHelper from '../../../../utils/hooks/useHelper';
 import CreateEntityControlledDial from '../../common/menus/CreateEntityControlledDial';
-import { commitMutation, handleErrorInForm, MESSAGING$, QueryRenderer } from '../../../../relay/environment';
+import { handleErrorInForm, QueryRenderer } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import SwitchField from '../../../../components/fields/SwitchField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -38,6 +38,7 @@ import useVocabularyCategory from '../../../../utils/hooks/useVocabularyCategory
 import { convertMarking } from '../../../../utils/edition';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 import useAttributes from '../../../../utils/hooks/useAttributes';
+import useApiMutation from '../../../../utils/hooks/useApiMutation';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -230,6 +231,11 @@ const StixCyberObservableCreation = ({
   const { isVocabularyField, fieldToCategory } = useVocabularyCategory();
   const { booleanAttributes, dateAttributes, multipleAttributes, numberAttributes, ignoredAttributes } = useAttributes();
   const [status, setStatus] = useState({ open: false, type: type ?? null });
+  const [commit] = useApiMutation(
+    stixCyberObservableMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Observable')} ${t_i18n('successfully created')}` },
+  );
 
   const handleOpen = () => setStatus({ open: true, type: status.type });
   const localHandleClose = () => setStatus({ open: false, type: type ?? null });
@@ -315,8 +321,7 @@ const StixCyberObservableCreation = ({
     if (values.file) {
       finalValues.file = values.file;
     }
-    commitMutation({
-      mutation: stixCyberObservableMutation,
+    commit({
       variables: finalValues,
       updater: (store) => insertNode(
         store,
@@ -326,15 +331,12 @@ const StixCyberObservableCreation = ({
       ),
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
-      setSubmitting,
       onCompleted: () => {
         setSubmitting(false);
         resetForm();
         localHandleClose();
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Observable')} ${t_i18n('successfully created')}`);
       },
     });
   };

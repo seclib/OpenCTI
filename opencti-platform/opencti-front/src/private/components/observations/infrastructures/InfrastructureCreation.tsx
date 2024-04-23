@@ -7,6 +7,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -115,7 +117,11 @@ export const InfrastructureCreationForm: FunctionComponent<InfrastructureFormPro
     basicShape,
   );
 
-  const [commit] = useApiMutation<InfrastructureCreationMutation>(infrastructureMutation);
+  const [commit] = useApiMutation<InfrastructureCreationMutation>(
+    infrastructureMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Infrastructure')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<InfrastructureAddInput>['onSubmit'] = (values, {
     setSubmitting,
@@ -290,17 +296,20 @@ const InfrastructureCreation = ({ paginationOptions }: {
   paginationOptions: InfrastructuresLinesPaginationQuery$variables
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_infrastructures',
     paginationOptions,
     'infrastructureAdd',
   );
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
 
   return (
     <Drawer
       title={t_i18n('Create an infrastructure')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Infrastructure') : undefined}
     >
       {({ onClose }) => (
         <InfrastructureCreationForm

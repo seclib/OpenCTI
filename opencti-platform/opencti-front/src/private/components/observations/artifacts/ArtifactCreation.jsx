@@ -12,7 +12,7 @@ import * as R from 'ramda';
 import makeStyles from '@mui/styles/makeStyles';
 import CreateEntityControlledDial from '../../common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, commitMutation, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
 import ObjectMarkingField from '../../common/form/ObjectMarkingField';
@@ -21,6 +21,7 @@ import { fieldSpacingContainerStyle } from '../../../../utils/field';
 import { insertNode } from '../../../../utils/store';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 import useHelper from '../../../../utils/hooks/useHelper';
+import useApiMutation from '../../../../utils/hooks/useApiMutation';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -99,6 +100,11 @@ const ArtifactCreation = ({
   const { isFeatureEnable } = useHelper();
   const [open, setOpen] = useState(false);
   const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+  const [commit] = useApiMutation(
+    artifactMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Artifact')} ${t_i18n('successfully created')}` },
+  );
 
   const handleOpen = () => {
     setOpen(true);
@@ -117,8 +123,7 @@ const ArtifactCreation = ({
       },
       values,
     );
-    commitMutation({
-      mutation: artifactMutation,
+    commit({
       variables: {
         file: values.file,
         ...adaptedValues,
@@ -131,15 +136,12 @@ const ArtifactCreation = ({
       ),
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
-      setSubmitting,
       onCompleted: () => {
         setSubmitting(false);
         resetForm();
         handleClose();
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Artifact')} ${t_i18n('successfully created')}`);
       },
     });
   };

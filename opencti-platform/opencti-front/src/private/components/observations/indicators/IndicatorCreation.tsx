@@ -15,7 +15,7 @@ import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -149,7 +149,11 @@ export const IndicatorCreationForm: FunctionComponent<IndicatorFormProps> = ({
     basicShape,
   );
 
-  const [commit] = useApiMutation<IndicatorCreationMutation>(indicatorMutation);
+  const [commit] = useApiMutation<IndicatorCreationMutation>(
+    indicatorMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Indicator')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<IndicatorAddInput>['onSubmit'] = (values, { setSubmitting, setErrors, resetForm }) => {
     const input: IndicatorCreationMutation$variables['input'] = {
@@ -184,7 +188,6 @@ export const IndicatorCreationForm: FunctionComponent<IndicatorFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -193,7 +196,6 @@ export const IndicatorCreationForm: FunctionComponent<IndicatorFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Indicator')} ${t_i18n('successfully created')}`);
       },
     });
   };
