@@ -11,7 +11,7 @@ import ConfidenceField from '@components/common/form/ConfidenceField';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import useHelper from 'src/utils/hooks/useHelper';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectMarkingField from '../../common/form/ObjectMarkingField';
@@ -109,7 +109,11 @@ export const EventCreationForm: FunctionComponent<EventFormProps> = ({
   };
   const eventValidator = useSchemaCreationValidation(EVENT_TYPE, basicShape);
 
-  const [commit] = useApiMutation<EventCreationMutation>(eventMutation);
+  const [commit] = useApiMutation<EventCreationMutation>(
+    eventMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Event')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<EventAddInput>['onSubmit'] = (
     values,
@@ -139,7 +143,6 @@ export const EventCreationForm: FunctionComponent<EventFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -148,7 +151,6 @@ export const EventCreationForm: FunctionComponent<EventFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Event')} ${t_i18n('successfully created')}`);
       },
     });
   };

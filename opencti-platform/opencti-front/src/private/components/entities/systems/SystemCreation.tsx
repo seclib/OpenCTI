@@ -11,7 +11,7 @@ import ConfidenceField from '@components/common/form/ConfidenceField';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -102,7 +102,11 @@ export const SystemCreationForm: FunctionComponent<SystemFormProps> = ({
   };
   const systemValidator = useSchemaCreationValidation(SYSTEM_TYPE, basicShape);
 
-  const [commit] = useApiMutation<SystemCreationMutation>(systemMutation);
+  const [commit] = useApiMutation<SystemCreationMutation>(
+    systemMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_System')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<SystemAddInput>['onSubmit'] = (
     values,
@@ -134,7 +138,6 @@ export const SystemCreationForm: FunctionComponent<SystemFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -143,7 +146,6 @@ export const SystemCreationForm: FunctionComponent<SystemFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_System')} ${t_i18n('successfully created')}`);
       },
     });
   };

@@ -11,7 +11,7 @@ import ConfidenceField from '@components/common/form/ConfidenceField';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectMarkingField from '../../common/form/ObjectMarkingField';
@@ -119,7 +119,11 @@ export const SectorCreationForm: FunctionComponent<SectorFormProps> = ({
   };
   const sectorValidator = useSchemaCreationValidation(SECTOR_TYPE, basicShape);
 
-  const [commit] = useApiMutation<SectorCreationMutation>(sectorMutation);
+  const [commit] = useApiMutation<SectorCreationMutation>(
+    sectorMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Sector')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<SectorAddInput>['onSubmit'] = (
     values,
     {
@@ -149,7 +153,6 @@ export const SectorCreationForm: FunctionComponent<SectorFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -158,7 +161,6 @@ export const SectorCreationForm: FunctionComponent<SectorFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Sector')} ${t_i18n('successfully created')}`);
       },
     });
   };

@@ -11,7 +11,7 @@ import ConfidenceField from '@components/common/form/ConfidenceField';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -107,7 +107,11 @@ export const OrganizationCreationForm: FunctionComponent<OrganizationFormProps> 
   };
   const organizationValidator = useSchemaCreationValidation(ORGANIZATION_TYPE, basicShape);
 
-  const [commit] = useApiMutation<OrganizationCreationMutation>(organizationMutation);
+  const [commit] = useApiMutation<OrganizationCreationMutation>(
+    organizationMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Organization')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<OrganizationAddInput>['onSubmit'] = (values, {
     setSubmitting,
@@ -137,7 +141,6 @@ export const OrganizationCreationForm: FunctionComponent<OrganizationFormProps> 
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -146,7 +149,6 @@ export const OrganizationCreationForm: FunctionComponent<OrganizationFormProps> 
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Organization')} ${t_i18n('successfully created')}`);
       },
     });
   };
