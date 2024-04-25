@@ -11,7 +11,7 @@ import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
-import { MESSAGING$, handleErrorInForm } from 'src/relay/environment';
+import { handleErrorInForm } from 'src/relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -94,7 +94,11 @@ export const RegionCreationForm: FunctionComponent<RegionFormProps> = ({
     confidence: Yup.number().nullable(),
   };
   const regionValidator = useSchemaCreationValidation(REGION_TYPE, basicShape);
-  const [commit] = useApiMutation(regionMutation);
+  const [commit] = useApiMutation(
+    regionMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Region')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<RegionAddInput>['onSubmit'] = (
     values,
@@ -121,7 +125,6 @@ export const RegionCreationForm: FunctionComponent<RegionFormProps> = ({
       },
       onError: (error: Error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -130,7 +133,6 @@ export const RegionCreationForm: FunctionComponent<RegionFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Region')} ${t_i18n('successfully created')}`);
       },
     });
   };

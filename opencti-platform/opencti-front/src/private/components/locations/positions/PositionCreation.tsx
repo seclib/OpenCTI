@@ -8,6 +8,8 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -108,7 +110,11 @@ export const PositionCreationForm: FunctionComponent<PositionFormProps> = ({
     POSITION_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation<PositionCreationMutation>(positionMutation);
+  const [commit] = useApiMutation<PositionCreationMutation>(
+    positionMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Position')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<PositionAddInput>['onSubmit'] = (
     values,
     { setSubmitting, setErrors, resetForm },
@@ -279,11 +285,14 @@ const PositionCreation = ({
   paginationOptions: PositionsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_positions', paginationOptions, 'positionAdd');
   return (
     <Drawer
       title={t_i18n('Create a position')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Position') : undefined}
     >
       {({ onClose }) => (
         <PositionCreationForm

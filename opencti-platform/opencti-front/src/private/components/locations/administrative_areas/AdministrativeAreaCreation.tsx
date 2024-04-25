@@ -8,7 +8,7 @@ import { FormikConfig } from 'formik/dist/types';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
-import { MESSAGING$, handleErrorInForm } from 'src/relay/environment';
+import { handleErrorInForm } from 'src/relay/environment';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
@@ -107,7 +107,11 @@ export const AdministrativeAreaCreationForm: FunctionComponent<AdministrativeAre
     ADMINISTRATIVE_AREA_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation(administrativeAreaMutation);
+  const [commit] = useApiMutation(
+    administrativeAreaMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Administrative-Area')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<AdministrativeAreaAddInput>['onSubmit'] = (
     values,
     { setSubmitting, resetForm, setErrors },
@@ -135,7 +139,6 @@ export const AdministrativeAreaCreationForm: FunctionComponent<AdministrativeAre
       },
       onError: (error: Error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -144,7 +147,6 @@ export const AdministrativeAreaCreationForm: FunctionComponent<AdministrativeAre
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Administrative-Area')} ${t_i18n('successfully created')}`);
       },
     });
   };

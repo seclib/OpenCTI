@@ -10,7 +10,7 @@ import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
-import { MESSAGING$, handleErrorInForm } from 'src/relay/environment';
+import { handleErrorInForm } from 'src/relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -101,7 +101,11 @@ export const CityCreationForm: FunctionComponent<CityFormProps> = ({
       .nullable(),
   };
   const cityValidator = useSchemaCreationValidation(CITY_TYPE, basicShape);
-  const [commit] = useApiMutation(cityMutation);
+  const [commit] = useApiMutation(
+    cityMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_City')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<CityAddInput>['onSubmit'] = (
     values,
     { setSubmitting, resetForm, setErrors },
@@ -129,7 +133,6 @@ export const CityCreationForm: FunctionComponent<CityFormProps> = ({
       },
       onError: (error: Error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -138,7 +141,6 @@ export const CityCreationForm: FunctionComponent<CityFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_City')} ${t_i18n('successfully created')}`);
       },
     });
   };
