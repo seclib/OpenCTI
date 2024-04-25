@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { Field, Form, Formik } from 'formik';
 import Button from '@mui/material/Button';
 import * as Yup from 'yup';
@@ -10,6 +10,8 @@ import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import { Dialog, DialogContent, DialogTitle, Fab, styled } from '@mui/material';
+import { Add } from '@mui/icons-material';
 import { useFormatter } from '../../../../components/i18n';
 import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -41,6 +43,21 @@ const useStyles = makeStyles<Theme>((theme) => ({
     marginLeft: theme.spacing(2),
   },
 }));
+
+const ContextualStyle = styled('div')(({ display }: { display?: boolean }) => ({
+  display: display ? 'block' : 'none',
+}));
+
+const ContextualAttackPatternCreateButton = styled('div')({
+  marginTop: '5px',
+});
+
+const ContextualAttackPatternFAB = styled(Fab)({
+  position: 'fixed',
+  bottom: 30,
+  right: 30,
+  zIndex: 2000,
+});
 
 const attackPatternMutation = graphql`
   mutation AttackPatternCreationMutation($input: AttackPatternAddInput!) {
@@ -110,6 +127,7 @@ export const AttackPatternCreationForm: FunctionComponent<AttackPatternFormProps
   onCompleted,
   defaultCreatedBy,
   defaultMarkingDefinitions,
+  inputValue,
 }) => {
   const classes = useStyles();
   const { t_i18n } = useFormatter();
@@ -175,7 +193,7 @@ export const AttackPatternCreationForm: FunctionComponent<AttackPatternFormProps
   const initialValues = useDefaultValues(
     ATTACK_PATTERN_TYPE,
     {
-      name: '',
+      name: inputValue ?? '',
       x_mitre_id: '',
       description: '',
       confidence: undefined,
@@ -277,13 +295,22 @@ export const AttackPatternCreationForm: FunctionComponent<AttackPatternFormProps
 };
 
 const AttackPatternCreation = ({
+  contextual,
+  display,
+  inputValue,
   paginationOptions,
 }: {
+  contextual?: boolean;
+  display?: boolean;
+  inputValue?: string;
   paginationOptions: AttackPatternsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
   const { isFeatureEnable } = useHelper();
   const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+  const [open, setOpen] = useState<boolean>(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_attackPatterns',
@@ -291,7 +318,7 @@ const AttackPatternCreation = ({
     'attackPatternAdd',
   );
 
-  return (
+  const renderClassic = () => (
     <Drawer
       title={t_i18n('Create an attack pattern')}
       variant={FABReplaced ? undefined : DrawerVariant.create}
@@ -306,6 +333,38 @@ const AttackPatternCreation = ({
       )}
     </Drawer>
   );
+
+  const renderContextual = () => (
+    <ContextualStyle display={display}>
+      {FABReplaced
+        ? <ContextualAttackPatternCreateButton>
+          {CreateEntityControlledDial('entity_Attack-Pattern')({ onOpen: handleOpen })}
+        </ContextualAttackPatternCreateButton>
+        : <ContextualAttackPatternFAB
+            onClick={handleOpen}
+            color="secondary"
+            aria-label="Add"
+          >
+          <Add />
+        </ContextualAttackPatternFAB>
+      }
+      <Dialog open={open} onClose={handleClose} PaperProps={{ elevation: 1 }}>
+        <DialogTitle>{t_i18n('Create an attack pattern')}</DialogTitle>
+        <DialogContent>
+          <AttackPatternCreationForm
+            inputValue={inputValue}
+            updater={updater}
+            onCompleted={handleClose}
+            onReset={handleClose}
+          />
+        </DialogContent>
+      </Dialog>
+    </ContextualStyle>
+  );
+
+  return contextual
+    ? renderContextual()
+    : renderClassic();
 };
 
 export default AttackPatternCreation;

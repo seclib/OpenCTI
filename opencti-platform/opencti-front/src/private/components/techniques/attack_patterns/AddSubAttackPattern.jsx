@@ -4,6 +4,7 @@ import { compose } from 'ramda';
 import withStyles from '@mui/styles/withStyles';
 import IconButton from '@mui/material/IconButton';
 import { Add } from '@mui/icons-material';
+import { styled } from '@mui/material';
 import Drawer from '../../common/drawer/Drawer';
 import inject18n from '../../../../components/i18n';
 import SearchInput from '../../../../components/SearchInput';
@@ -57,6 +58,14 @@ const styles = (theme) => ({
   },
 });
 
+const StyledSearchHeader = styled('div')({
+  marginLeft: 'auto',
+  marginRight: '20px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+});
+
 class AddSubAttackPattern extends Component {
   constructor(props) {
     super(props);
@@ -96,12 +105,18 @@ class AddSubAttackPattern extends Component {
           onClose={this.handleClose.bind(this)}
           title={t('Add sub attack patterns')}
           header={(
-            <div className={classes.search}>
+            <StyledSearchHeader>
               <SearchInput
                 variant="inDrawer"
                 onSubmit={this.handleSearch.bind(this)}
               />
-            </div>
+              <AttackPatternCreation
+                display={this.state.open}
+                contextual={true}
+                inputValue={this.state.search}
+                paginationOptions={paginationOptions}
+              />
+            </StyledSearchHeader>
           )}
         >
           <>
@@ -122,12 +137,6 @@ class AddSubAttackPattern extends Component {
                   />
                 );
               }}
-            />
-            <AttackPatternCreation
-              display={this.state.open}
-              contextual={true}
-              inputValue={this.state.search}
-              paginationOptions={paginationOptions}
             />
           </>
         </Drawer>
