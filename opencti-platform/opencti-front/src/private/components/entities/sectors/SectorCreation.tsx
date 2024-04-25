@@ -8,8 +8,10 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { handleErrorInForm } from '../../../../relay/environment';
+import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectMarkingField from '../../common/form/ObjectMarkingField';
@@ -147,6 +149,7 @@ export const SectorCreationForm: FunctionComponent<SectorFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
+        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -155,6 +158,7 @@ export const SectorCreationForm: FunctionComponent<SectorFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
+        MESSAGING$.notifySuccess(`${t_i18n('entity_Sector')} ${t_i18n('successfully created')}`);
       },
     });
   };
@@ -263,11 +267,14 @@ const SectorCreation = ({
   paginationOptions: SectorsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_sectors', paginationOptions, 'sectorAdd');
   return (
     <Drawer
       title={t_i18n('Create a sector')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Sector') : undefined}
     >
       {({ onClose }) => (
         <SectorCreationForm
