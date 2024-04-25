@@ -13,8 +13,11 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import { styled } from '@mui/material';
 import { useFormatter } from '../../../../components/i18n';
-import { handleErrorInForm } from '../../../../relay/environment';
+import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -54,6 +57,10 @@ const useStyles = makeStyles<Theme>((theme) => ({
     marginLeft: theme.spacing(2),
   },
 }));
+
+const ContextualNarrativeCreateButton = styled('div')({
+  marginTop: '5px',
+});
 
 const narrativeMutation = graphql`
   mutation NarrativeCreationMutation($input: NarrativeAddInput!) {
@@ -163,6 +170,7 @@ export const NarrativeCreationForm: FunctionComponent<NarrativeFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
+        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -171,6 +179,7 @@ export const NarrativeCreationForm: FunctionComponent<NarrativeFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
+        MESSAGING$.notifySuccess(`${t_i18n('entity_Narrative')} ${t_i18n('successfully created')}`);
       },
     });
   };
@@ -274,9 +283,11 @@ const NarrativeCreation: FunctionComponent<NarrativeFormProps> = ({
 }) => {
   const classes = useStyles();
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_narratives',
@@ -287,7 +298,8 @@ const NarrativeCreation: FunctionComponent<NarrativeFormProps> = ({
     return (
       <Drawer
         title={t_i18n('Create a narrative')}
-        variant={DrawerVariant.create}
+        variant={FABReplaced ? undefined : DrawerVariant.create}
+        controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Narrative') : undefined}
       >
         {({ onClose }) => (
           <NarrativeCreationForm
@@ -304,14 +316,19 @@ const NarrativeCreation: FunctionComponent<NarrativeFormProps> = ({
   const renderContextual = () => {
     return (
       <div style={{ display: display ? 'block' : 'none' }}>
-        <Fab
-          onClick={handleOpen}
-          color="secondary"
-          aria-label="Add"
-          className={classes.createButtonContextual}
-        >
-          <Add />
-        </Fab>
+        {FABReplaced
+          ? <ContextualNarrativeCreateButton>
+            {CreateEntityControlledDial('entity_Narrative')({ onOpen: handleOpen })}
+          </ContextualNarrativeCreateButton>
+          : <Fab
+              onClick={handleOpen}
+              color="secondary"
+              aria-label="Add"
+              className={classes.createButtonContextual}
+            >
+            <Add />
+          </Fab>
+        }
         <Dialog open={open} onClose={handleClose} PaperProps={{ elevation: 1 }}>
           <DialogTitle>{t_i18n('Create a narrative')}</DialogTitle>
           <DialogContent>

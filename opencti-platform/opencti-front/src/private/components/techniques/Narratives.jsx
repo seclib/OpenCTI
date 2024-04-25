@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import { compose, propOr } from 'ramda';
-import withStyles from '@mui/styles/withStyles';
+import { styled } from '@mui/material';
 import { QueryRenderer } from '../../../relay/environment';
 import { buildViewParamsFromUrlAndStorage, saveViewParameters } from '../../../utils/ListParameters';
 import inject18n from '../../../components/i18n';
@@ -15,11 +15,16 @@ import Breadcrumbs from '../../../components/Breadcrumbs';
 
 const LOCAL_STORAGE_KEY = 'narratives';
 
-const styles = () => ({
-  parameters: {
-    float: 'left',
-    marginTop: -10,
-  },
+const ParametersHeader = styled('div')({
+  marginTop: -10,
+});
+
+const StyledSearchInput = styled(SearchInput)({
+  float: 'left',
+});
+
+const CreateNarrativeButton = styled('div')({
+  float: 'right',
 });
 
 class Narratives extends Component {
@@ -55,19 +60,22 @@ class Narratives extends Component {
 
   render() {
     const { searchTerm } = this.state;
-    const { t, classes } = this.props;
+    const { t } = this.props;
     return (
       <>
         <Breadcrumbs variant="list" elements={[{ label: t('Techniques') }, { label: t('Narratives'), current: true }]} />
-        <div className={classes.parameters}>
-          <div style={{ float: 'left', marginRight: 20 }}>
-            <SearchInput
-              variant="small"
-              onSubmit={this.handleSearch.bind(this)}
-              keyword={searchTerm}
-            />
-          </div>
-        </div>
+        <ParametersHeader>
+          <StyledSearchInput
+            variant="small"
+            onSubmit={this.handleSearch.bind(this)}
+            keyword={searchTerm}
+          />
+          <CreateNarrativeButton>
+            <Security needs={[KNOWLEDGE_KNUPDATE]}>
+              <NarrativeCreation />
+            </Security>
+          </CreateNarrativeButton>
+        </ParametersHeader>
         <div className="clearfix" />
         <QueryRenderer
           query={narrativesLinesQuery}
@@ -76,9 +84,6 @@ class Narratives extends Component {
             <NarrativesLines data={props} keyword={searchTerm} />
           )}
         />
-        <Security needs={[KNOWLEDGE_KNUPDATE]}>
-          <NarrativeCreation />
-        </Security>
       </>
     );
   }
@@ -88,7 +93,6 @@ Narratives.propTypes = {
   t: PropTypes.func,
   navigate: PropTypes.func,
   location: PropTypes.object,
-  classes: PropTypes.object,
 };
 
-export default compose(inject18n, withRouter, withStyles(styles))(Narratives);
+export default compose(inject18n, withRouter)(Narratives);
