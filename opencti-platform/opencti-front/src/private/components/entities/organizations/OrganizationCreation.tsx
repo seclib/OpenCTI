@@ -8,8 +8,10 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { handleErrorInForm } from '../../../../relay/environment';
+import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -135,6 +137,7 @@ export const OrganizationCreationForm: FunctionComponent<OrganizationFormProps> 
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
+        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -143,6 +146,7 @@ export const OrganizationCreationForm: FunctionComponent<OrganizationFormProps> 
         if (onCompleted) {
           onCompleted();
         }
+        MESSAGING$.notifySuccess(`${t_i18n('entity_Organization')} ${t_i18n('successfully created')}`);
       },
     });
   };
@@ -265,7 +269,8 @@ const OrganizationCreation = ({ paginationOptions }: {
   paginationOptions: OrganizationsLinesPaginationQuery$variables
 }) => {
   const { t_i18n } = useFormatter();
-
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_organizations',
@@ -276,7 +281,8 @@ const OrganizationCreation = ({ paginationOptions }: {
   return (
     <Drawer
       title={t_i18n('Create an organization')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Organization') : undefined}
     >
       {({ onClose }) => (
         <OrganizationCreationForm
