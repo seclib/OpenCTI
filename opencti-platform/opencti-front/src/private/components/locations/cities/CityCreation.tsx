@@ -8,6 +8,9 @@ import { FormikConfig } from 'formik/dist/types';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import { MESSAGING$, handleErrorInForm } from 'src/relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -101,7 +104,7 @@ export const CityCreationForm: FunctionComponent<CityFormProps> = ({
   const [commit] = useApiMutation(cityMutation);
   const onSubmit: FormikConfig<CityAddInput>['onSubmit'] = (
     values,
-    { setSubmitting, resetForm },
+    { setSubmitting, resetForm, setErrors },
   ) => {
     const input: CityCreationMutation$variables['input'] = {
       name: values.name,
@@ -124,12 +127,18 @@ export const CityCreationForm: FunctionComponent<CityFormProps> = ({
           updater(store, 'cityAdd');
         }
       },
+      onError: (error: Error) => {
+        handleErrorInForm(error, setErrors);
+        MESSAGING$.notifyError(`${error}`);
+        setSubmitting(false);
+      },
       onCompleted: () => {
         setSubmitting(false);
         resetForm();
         if (onCompleted) {
           onCompleted();
         }
+        MESSAGING$.notifySuccess(`${t_i18n('entity_City')} ${t_i18n('successfully created')}`);
       },
     });
   };
@@ -242,11 +251,14 @@ const CityCreation = ({
   paginationOptions: CitiesLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_cities', paginationOptions, 'cityAdd');
   return (
     <Drawer
       title={t_i18n('Create a city')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_City') : undefined}
     >
       {({ onClose }) => (
         <CityCreationForm
