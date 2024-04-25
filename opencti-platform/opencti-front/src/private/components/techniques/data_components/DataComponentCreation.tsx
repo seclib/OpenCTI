@@ -14,7 +14,7 @@ import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -122,7 +122,11 @@ export const DataComponentCreationForm: FunctionComponent<DataComponentFormProps
     basicShape,
   );
 
-  const [commit] = useApiMutation(dataComponentMutation);
+  const [commit] = useApiMutation(
+    dataComponentMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Data-Component')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<DataComponentAddInput>['onSubmit'] = (
     values: DataComponentAddInput,
     {
@@ -152,7 +156,6 @@ export const DataComponentCreationForm: FunctionComponent<DataComponentFormProps
       },
       onError: (error: Error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -161,7 +164,6 @@ export const DataComponentCreationForm: FunctionComponent<DataComponentFormProps
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Data-Component')} ${t_i18n('successfully created')}`);
       },
     });
   };

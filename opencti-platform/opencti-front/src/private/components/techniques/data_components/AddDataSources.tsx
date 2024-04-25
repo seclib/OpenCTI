@@ -3,6 +3,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import IconButton from '@mui/material/IconButton';
 import { Add } from '@mui/icons-material';
 import Drawer from '@components/common/drawer/Drawer';
+import { styled } from '@mui/material';
 import { useFormatter } from '../../../../components/i18n';
 import DataSourceCreation from '../data_sources/DataSourceCreation';
 import SearchInput from '../../../../components/SearchInput';
@@ -19,11 +20,15 @@ const useStyles = makeStyles(() => ({
     float: 'left',
     marginTop: -15,
   },
-  search: {
-    marginLeft: 'auto',
-    marginRight: ' 20px',
-  },
 }));
+
+const StyledSearchHeader = styled('div')({
+  marginLeft: 'auto',
+  marginRight: '20px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+});
 
 const AddDataSources: FunctionComponent<{ dataComponentId: string }> = ({
   dataComponentId,
@@ -66,12 +71,18 @@ const AddDataSources: FunctionComponent<{ dataComponentId: string }> = ({
         onClose={handleClose}
         title={t_i18n('Add data sources')}
         header={(
-          <div className={classes.search}>
+          <StyledSearchHeader>
             <SearchInput
               variant="inDrawer"
               onSubmit={handleSearch}
             />
-          </div>
+            <DataSourceCreation
+              contextual={true}
+              display={open}
+              inputValue={search}
+              paginationOptions={paginationOptions}
+            />
+          </StyledSearchHeader>
         )}
       >
         {queryRef && (
@@ -85,12 +96,6 @@ const AddDataSources: FunctionComponent<{ dataComponentId: string }> = ({
           </React.Suspense>
         )}
       </Drawer>
-      <DataSourceCreation
-        contextual={true}
-        display={open}
-        inputValue={search}
-        paginationOptions={paginationOptions}
-      />
     </div>
   );
 };

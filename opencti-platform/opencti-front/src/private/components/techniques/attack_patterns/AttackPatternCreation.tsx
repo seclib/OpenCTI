@@ -13,7 +13,7 @@ import CreateEntityControlledDial from '@components/common/menus/CreateEntityCon
 import { Dialog, DialogContent, DialogTitle, Fab, styled } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import KillChainPhasesField from '../../common/form/KillChainPhasesField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -143,6 +143,8 @@ export const AttackPatternCreationForm: FunctionComponent<AttackPatternFormProps
 
   const [commit] = useApiMutation<AttackPatternCreationMutation>(
     attackPatternMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Attack-Pattern')} ${t_i18n('successfully created')}` },
   );
 
   const onSubmit: FormikConfig<AttackPatternAddInput>['onSubmit'] = (
@@ -176,7 +178,6 @@ export const AttackPatternCreationForm: FunctionComponent<AttackPatternFormProps
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -185,7 +186,6 @@ export const AttackPatternCreationForm: FunctionComponent<AttackPatternFormProps
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Attack-Pattern')} ${t_i18n('successfully created')}`);
       },
     });
   };

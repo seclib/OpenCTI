@@ -17,7 +17,7 @@ import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { styled } from '@mui/material';
 import { useFormatter } from '../../../../components/i18n';
-import { MESSAGING$, handleErrorInForm } from '../../../../relay/environment';
+import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -143,7 +143,11 @@ export const NarrativeCreationForm: FunctionComponent<NarrativeFormProps> = ({
     basicShape,
   );
 
-  const [commit] = useApiMutation<NarrativeCreationMutation>(narrativeMutation);
+  const [commit] = useApiMutation<NarrativeCreationMutation>(
+    narrativeMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Narrative')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<NarrativeAddInput>['onSubmit'] = (
     values,
@@ -170,7 +174,6 @@ export const NarrativeCreationForm: FunctionComponent<NarrativeFormProps> = ({
       },
       onError: (error) => {
         handleErrorInForm(error, setErrors);
-        MESSAGING$.notifyError(`${error}`);
         setSubmitting(false);
       },
       onCompleted: () => {
@@ -179,7 +182,6 @@ export const NarrativeCreationForm: FunctionComponent<NarrativeFormProps> = ({
         if (onCompleted) {
           onCompleted();
         }
-        MESSAGING$.notifySuccess(`${t_i18n('entity_Narrative')} ${t_i18n('successfully created')}`);
       },
     });
   };

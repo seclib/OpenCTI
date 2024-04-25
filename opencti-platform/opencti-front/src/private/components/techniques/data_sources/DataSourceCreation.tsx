@@ -13,6 +13,9 @@ import { FormikConfig, FormikHelpers } from 'formik/dist/types';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import CustomFileUploader from '@components/common/files/CustomFileUploader';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import { styled } from '@mui/material';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
 import ObjectLabelField from '../../common/form/ObjectLabelField';
@@ -55,6 +58,10 @@ const useStyles = makeStyles<Theme>((theme) => ({
     marginLeft: theme.spacing(2),
   },
 }));
+
+const ContextualDataSourceCreateButton = styled('div')({
+  marginTop: '5px',
+});
 
 const dataSourceMutation = graphql`
   mutation DataSourceCreationMutation($input: DataSourceAddInput!) {
@@ -123,7 +130,11 @@ export const DataSourceCreationForm: FunctionComponent<DataSourceFormProps> = ({
     basicShape,
   );
 
-  const [commit] = useApiMutation(dataSourceMutation);
+  const [commit] = useApiMutation(
+    dataSourceMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Data-Source')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<DataSourceAddInput>['onSubmit'] = (
     values: DataSourceAddInput,
     { setSubmitting, setErrors, resetForm }: FormikHelpers<DataSourceAddInput>,
@@ -288,6 +299,8 @@ const DataSourceCreation: FunctionComponent<DataSourceCreationProps> = ({
   paginationOptions,
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACED');
   const classes = useStyles();
 
   const [open, setOpen] = useState(false);
@@ -303,7 +316,8 @@ const DataSourceCreation: FunctionComponent<DataSourceCreationProps> = ({
   const renderClassic = () => (
     <Drawer
       title={t_i18n('Create a data source')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Data-Source') : undefined}
     >
       {({ onClose }) => (
         <DataSourceCreationForm
@@ -318,14 +332,19 @@ const DataSourceCreation: FunctionComponent<DataSourceCreationProps> = ({
 
   const renderContextual = () => (
     <div style={{ display: display ? 'block' : 'none' }}>
-      <Fab
-        onClick={handleOpen}
-        color="secondary"
-        aria-label="Add"
-        className={classes.createButtonContextual}
-      >
-        <Add />
-      </Fab>
+      {FABReplaced
+        ? <ContextualDataSourceCreateButton>
+          {CreateEntityControlledDial('entity_Data-Source')({ onOpen: handleOpen })}
+        </ContextualDataSourceCreateButton>
+        : <Fab
+            onClick={handleOpen}
+            color="secondary"
+            aria-label="Add"
+            className={classes.createButtonContextual}
+          >
+          <Add />
+        </Fab>
+      }
       <Dialog open={open} onClose={handleClose} PaperProps={{ elevation: 1 }}>
         <DialogTitle>{t_i18n('Create a data source')}</DialogTitle>
         <DialogContent>
