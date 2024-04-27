@@ -1,4 +1,8 @@
 import React, { FunctionComponent, useContext, useEffect } from 'react';
+import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
+import useFiltersState from 'src/utils/filters/useFiltersState';
+import { v4 as uuid } from 'uuid';
+import useHelper from 'src/utils/hooks/useHelper';
 import useAuth from '../../../../../utils/hooks/useAuth';
 import ListLines from '../../../../../components/list_lines/ListLines';
 import ToolBar from '../../../data/ToolBar';
@@ -14,10 +18,6 @@ import { DataColumns, PaginationOptions } from '../../../../../components/list_l
 import { EntityStixCoreRelationshipsEntitiesViewLinesPaginationQuery$variables } from './__generated__/EntityStixCoreRelationshipsEntitiesViewLinesPaginationQuery.graphql';
 import { emptyFilterGroup, isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../../utils/filters/filtersUtils';
 import { FilterGroup } from '../../../../../utils/filters/filtersHelpers-types';
-import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
-import useFiltersState from 'src/utils/filters/useFiltersState';
-import { v4 as uuid } from 'uuid';
-import useHelper from 'src/utils/hooks/useHelper';
 
 interface EntityStixCoreRelationshipsEntitiesViewProps {
   entityId: string;
@@ -157,9 +157,9 @@ EntityStixCoreRelationshipsEntitiesViewProps
           id: uuid(),
           key: 'entity_type',
           values: actualFilters,
-        }]
+        }],
       }
-      : emptyFilterGroup
+      : emptyFilterGroup,
   );
   useEffect(() => {
     setCreateRelationshipContext({
@@ -261,22 +261,22 @@ EntityStixCoreRelationshipsEntitiesViewProps
       />
       {!FABReplaced
         && <Security needs={[KNOWLEDGE_KNUPDATE]}>
-            <StixCoreRelationshipCreationFromEntity
-              entityId={entityId}
-              allowedRelationshipTypes={relationshipTypes}
-              isRelationReversed={isRelationReversed}
-              targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(
-                stixCoreObjectTypes,
-              )}
-              targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(
-                stixCoreObjectTypes,
-              )}
-              defaultStartTime={defaultStartTime}
-              defaultStopTime={defaultStopTime}
-              paginationOptions={paginationOptions}
-              connectionKey="Pagination_stixCoreObjects"
-              paddingRight={paddingRightButtonAdd ?? 220}
-            />
+          <StixCoreRelationshipCreationFromEntity
+            entityId={entityId}
+            allowedRelationshipTypes={relationshipTypes}
+            isRelationReversed={isRelationReversed}
+            targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(
+              stixCoreObjectTypes,
+            )}
+            targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(
+              stixCoreObjectTypes,
+            )}
+            defaultStartTime={defaultStartTime}
+            defaultStopTime={defaultStopTime}
+            paginationOptions={paginationOptions}
+            connectionKey="Pagination_stixCoreObjects"
+            paddingRight={paddingRightButtonAdd ?? 220}
+          />
           </Security>
       }
     </>

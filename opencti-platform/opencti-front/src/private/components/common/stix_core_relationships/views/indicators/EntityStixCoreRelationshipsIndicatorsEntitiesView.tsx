@@ -1,4 +1,9 @@
 import React, { FunctionComponent, useContext, useEffect } from 'react';
+import useHelper from 'src/utils/hooks/useHelper';
+import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
+import { computeTargetStixDomainObjectTypes } from 'src/utils/stixTypeUtils';
+import useFiltersState from 'src/utils/filters/useFiltersState';
+import { v4 as uuid } from 'uuid';
 import ListLines from '../../../../../../components/list_lines/ListLines';
 import ToolBar from '../../../../data/ToolBar';
 import useEntityToggle from '../../../../../../utils/hooks/useEntityToggle';
@@ -14,11 +19,6 @@ import useAuth from '../../../../../../utils/hooks/useAuth';
 import { QueryRenderer } from '../../../../../../relay/environment';
 import { emptyFilterGroup, isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../../../utils/filters/filtersUtils';
 import { FilterGroup } from '../../../../../../utils/filters/filtersHelpers-types';
-import useHelper from 'src/utils/hooks/useHelper';
-import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
-import { computeTargetStixDomainObjectTypes } from 'src/utils/stixTypeUtils';
-import useFiltersState from 'src/utils/filters/useFiltersState';
-import { v4 as uuid } from 'uuid';
 
 interface EntityStixCoreRelationshipsIndicatorsEntitiesViewProps {
   entityId: string
@@ -157,9 +157,9 @@ const EntityStixCoreRelationshipsIndicatorsEntitiesView: FunctionComponent<Entit
           id: uuid(),
           key: 'entity_type',
           values: actualFilters,
-        }]
+        }],
       }
-      : emptyFilterGroup
+      : emptyFilterGroup,
   );
   useEffect(() => {
     setCreateRelationshipContext({
@@ -240,18 +240,18 @@ const EntityStixCoreRelationshipsIndicatorsEntitiesView: FunctionComponent<Entit
       />
       {!FABReplaced
         && <Security needs={[KNOWLEDGE_KNUPDATE]}>
-            <StixCoreRelationshipCreationFromEntity
-              entityId={entityId}
-              isRelationReversed={isRelationReversed}
-              targetStixDomainObjectTypes={stixDomainObjectTypes}
-              allowedRelationshipTypes={relationshipTypes}
-              paginationOptions={paginationOptions}
-              openExports={openExports}
-              paddingRight={220}
-              connectionKey="Pagination_indicators"
-              defaultStartTime={defaultStartTime}
-              defaultStopTime={defaultStopTime}
-            />
+          <StixCoreRelationshipCreationFromEntity
+            entityId={entityId}
+            isRelationReversed={isRelationReversed}
+            targetStixDomainObjectTypes={stixDomainObjectTypes}
+            allowedRelationshipTypes={relationshipTypes}
+            paginationOptions={paginationOptions}
+            openExports={openExports}
+            paddingRight={220}
+            connectionKey="Pagination_indicators"
+            defaultStartTime={defaultStartTime}
+            defaultStopTime={defaultStopTime}
+          />
           </Security>
       }
     </>

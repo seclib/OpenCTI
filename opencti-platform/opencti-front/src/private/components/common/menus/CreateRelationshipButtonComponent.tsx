@@ -1,12 +1,12 @@
-import React, { FunctionComponent, useContext } from "react";
-import Security from "src/utils/Security";
-import { KNOWLEDGE_KNUPDATE } from "src/utils/hooks/useGranted";
-import StixCoreRelationshipCreationFromEntity from "../stix_core_relationships/StixCoreRelationshipCreationFromEntity";
-import { useFormatter } from "src/components/i18n";
-import { Button, styled } from "@mui/material";
-import { Add } from "@mui/icons-material";
-import { CreateRelationshipContext } from "./CreateRelationshipContextProvider";
-import { computeTargetStixCyberObservableTypes, computeTargetStixDomainObjectTypes } from "src/utils/stixTypeUtils";
+import React, { FunctionComponent, useContext } from 'react';
+import Security from 'src/utils/Security';
+import { KNOWLEDGE_KNUPDATE } from 'src/utils/hooks/useGranted';
+import { useFormatter } from 'src/components/i18n';
+import { Button, styled } from '@mui/material';
+import { Add } from '@mui/icons-material';
+import { computeTargetStixCyberObservableTypes, computeTargetStixDomainObjectTypes } from 'src/utils/stixTypeUtils';
+import { CreateRelationshipContext } from './CreateRelationshipContextProvider';
+import StixCoreRelationshipCreationFromEntity from '../stix_core_relationships/StixCoreRelationshipCreationFromEntity';
 
 const CreateRelationshipButton = styled(Button)({
   marginLeft: '3px',
@@ -40,7 +40,7 @@ const CreateRelationshipButtonComponent: FunctionComponent<CreateRelationshipBut
   defaultStartTime,
   defaultStopTime,
 }) => {
-  const { state: { stixCoreObjectTypes, connectionKey, paginationOptions, reversed }} = useContext(CreateRelationshipContext);
+  const { state: { stixCoreObjectTypes, connectionKey, paginationOptions, reversed } } = useContext(CreateRelationshipContext);
   const startTime = new Date(defaultStartTime ?? new Date()).toISOString();
   const stopTime = new Date(defaultStopTime ?? new Date()).toISOString();
   return (
@@ -50,8 +50,8 @@ const CreateRelationshipButtonComponent: FunctionComponent<CreateRelationshipBut
         paginationOptions={paginationOptions ?? {}}
         defaultStartTime={startTime}
         defaultStopTime={stopTime}
-        targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(stixCoreObjectTypes)}
-        targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(stixCoreObjectTypes)}
+        targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(stixCoreObjectTypes ?? [])}
+        targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(stixCoreObjectTypes ?? [])}
         connectionKey={connectionKey ?? undefined}
         isRelationReversed={reversed ?? false}
         paddingRight={0}

@@ -7,6 +7,8 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import StixCoreObjectContentRoot from '../../common/stix_core_objects/StixCoreObjectContentRoot';
+import CreateRelationshipContextProvider from '@components/common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '@components/common/menus/CreateRelationshipButtonComponent';
 import StixCoreObjectSimulationResult from '../../common/stix_core_objects/StixCoreObjectSimulationResult';
 import withRouter from '../../../../utils/compat-router/withRouter';
 import { QueryRenderer, requestSubscription } from '../../../../relay/environment';
@@ -49,6 +51,8 @@ const ThreatActorGroupQuery = graphql`
       name
       aliases
       x_opencti_graph_data
+      first_seen
+      last_seen
       ...ThreatActorGroup_ThreatActorGroup
       ...ThreatActorGroupKnowledge_ThreatActorGroup
       ...FileImportViewer_entity
@@ -91,7 +95,7 @@ class RootThreatActorGroup extends Component {
     } = this.props;
     const link = `/dashboard/threats/threat_actors_group/${threatActorGroupId}/knowledge`;
     return (
-      <>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route
             path="/knowledge/*"
@@ -140,6 +144,7 @@ class RootThreatActorGroup extends Component {
                       entityType="Threat-Actor-Group"
                       stixDomainObject={threatActorGroup}
                       PopoverComponent={<ThreatActorGroupPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                     />
                     <Box
@@ -252,7 +257,7 @@ class RootThreatActorGroup extends Component {
             return <Loader />;
           }}
         />
-      </>
+      </CreateRelationshipContextProvider>
     );
   }
 }

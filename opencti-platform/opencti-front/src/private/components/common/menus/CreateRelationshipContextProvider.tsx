@@ -1,15 +1,16 @@
-import React, { ReactNode, createContext, useMemo, useState } from "react";
-import { FilterGroup, emptyFilterGroup } from "src/utils/filters/filtersUtils";
-import { handleFilterHelpers } from "src/utils/hooks/useLocalStorage";
+import React, { ReactNode, createContext, useMemo, useState } from 'react';
+import { FilterGroup, emptyFilterGroup } from 'src/utils/filters/filtersUtils';
+import { handleFilterHelpers } from 'src/utils/hooks/useLocalStorage';
 
 interface CreateRelationshipContextStateType {
-  relationshipTypes: string[];
-  stixCoreObjectTypes: string[];
+  relationshipTypes?: string[];
+  stixCoreObjectTypes?: string[];
   connectionKey?: string;
-  filters: FilterGroup;
+  filters?: FilterGroup;
   reversed?: boolean;
   helpers?: handleFilterHelpers;
   paginationOptions?: unknown;
+  onCreate?: () => void;
 }
 
 export interface CreateRelationshipContextType {
@@ -38,6 +39,7 @@ const CreateRelationshipContextProvider = ({ children }: { children: ReactNode }
   const [reversed, setReversed] = useState<boolean>(false);
   const [helpers, setHelpers] = useState<handleFilterHelpers>();
   const [paginationOptions, setPaginationOptions] = useState<unknown>();
+  const [onCreate, setOnCreate] = useState<() => void>(() => () => {});
   const state = {
     relationshipTypes,
     stixCoreObjectTypes,
@@ -46,6 +48,7 @@ const CreateRelationshipContextProvider = ({ children }: { children: ReactNode }
     reversed,
     helpers,
     paginationOptions,
+    onCreate,
   };
   const setState = ({
     relationshipTypes,
@@ -55,6 +58,7 @@ const CreateRelationshipContextProvider = ({ children }: { children: ReactNode }
     reversed,
     helpers,
     paginationOptions,
+    onCreate,
   }: CreateRelationshipContextStateType) => {
     if (relationshipTypes) setRelationshipTypes(relationshipTypes);
     if (stixCoreObjectTypes) setStixCoreObjectTypes(stixCoreObjectTypes);
@@ -63,14 +67,15 @@ const CreateRelationshipContextProvider = ({ children }: { children: ReactNode }
     if (reversed) setReversed(reversed);
     if (helpers) setHelpers(helpers);
     if (paginationOptions) setPaginationOptions(paginationOptions);
+    if (onCreate) setOnCreate(onCreate);
   };
   const values = useMemo<CreateRelationshipContextType>(() => ({
     state,
     setState,
-  }), [relationshipTypes, stixCoreObjectTypes, filters, helpers, paginationOptions]);
+  }), [...Object.values(state)]);
   return <CreateRelationshipContext.Provider value={values}>
     {children}
-  </CreateRelationshipContext.Provider>
+  </CreateRelationshipContext.Provider>;
 };
 
 export default CreateRelationshipContextProvider;

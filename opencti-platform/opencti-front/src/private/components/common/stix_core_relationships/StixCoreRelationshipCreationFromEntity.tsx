@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useContext, useEffect, useRef, useState } from 'react';
-import { v4 as uuid } from 'uuid';
 import { graphql } from 'react-relay';
 import * as R from 'ramda';
 import Drawer from '@mui/material/Drawer';
@@ -265,7 +264,8 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     relationshipTypes: initialRelationshipTypes,
     filters,
     helpers,
-  }} = useContext(CreateRelationshipContext);
+    onCreate: createRelationshipOnCreate,
+  } } = useContext(CreateRelationshipContext);
   let isOnlySDOs = false;
   let isOnlySCOs = false;
   let actualTypeFilterValues = [
@@ -368,7 +368,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
           : stixCoreRelationshipCreationFromEntityFromMutation,
         variables: { input: finalValues },
         updater: (store: RecordSourceSelectorProxy) => {
-          if (typeof onCreate !== 'function') {
+          if (typeof onCreate !== 'function' && typeof createRelationshipOnCreate !== 'function') {
             const userProxy = store.get(store.getRoot().getDataID());
             const payload = store.getRootField('stixCoreRelationshipAdd');
 
@@ -440,6 +440,9 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     handleClose();
     if (typeof onCreate === 'function') {
       onCreate();
+    } else if (typeof createRelationshipOnCreate === 'function') {
+      console.log('calling createRelationshipOnCreate');
+      createRelationshipOnCreate();
     }
     return true;
   };
@@ -699,18 +702,18 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
       <UserContext.Consumer>
         {({ schema }) => {
           const relationshipTypes = initialRelationshipTypes.length > 0
-          ? initialRelationshipTypes
-          : R.uniq(R.filter(
-            (n) => R.isNil(allowedRelationshipTypes)
+            ? initialRelationshipTypes
+            : R.uniq(R.filter(
+              (n) => R.isNil(allowedRelationshipTypes)
             || allowedRelationshipTypes.length === 0
             || allowedRelationshipTypes.includes('stix-core-relationship')
             || allowedRelationshipTypes.includes(n),
-            resolveRelationsTypes(
-              fromEntities[0].entity_type,
-              toEntities[0].entity_type,
-              schema?.schemaRelationsTypesMapping ?? new Map(),
-            ),
-          ));
+              resolveRelationsTypes(
+                fromEntities[0].entity_type,
+                toEntities[0].entity_type,
+                schema?.schemaRelationsTypesMapping ?? new Map(),
+              ),
+            ));
           return (
             <>
               <div className={classes.header}>
@@ -765,9 +768,9 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
 
   let openElement = controlledDial
     ? controlledDial({
-        onOpen: () => setOpen(true),
-        onClose: handleClose,
-      })
+      onOpen: () => setOpen(true),
+      onClose: handleClose,
+    })
     : '';
   if (variant === 'inLine') {
     openElement = (
