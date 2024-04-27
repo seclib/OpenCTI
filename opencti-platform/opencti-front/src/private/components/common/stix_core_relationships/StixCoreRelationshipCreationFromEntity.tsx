@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, useContext, useEffect, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { graphql } from 'react-relay';
 import * as R from 'ramda';
@@ -30,14 +30,14 @@ import StixCoreRelationshipCreationForm from './StixCoreRelationshipCreationForm
 import { resolveRelationsTypes } from '../../../../utils/Relation';
 import { UserContext } from '../../../../utils/hooks/useAuth';
 import ListLines from '../../../../components/list_lines/ListLines';
-import { emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../utils/filters/filtersUtils';
+import { useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../utils/filters/filtersUtils';
 import StixCoreRelationshipCreationFromEntityStixCoreObjectsLines, {
   stixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery,
 } from './StixCoreRelationshipCreationFromEntityStixCoreObjectsLines';
-import useFiltersState from '../../../../utils/filters/useFiltersState';
 import type { Theme } from '../../../../components/Theme';
 import { ModuleHelper } from '../../../../utils/platformModulesHelper';
 import useEntityToggle from '../../../../utils/hooks/useEntityToggle';
+import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -224,6 +224,10 @@ interface StixCoreRelationshipCreationFromEntityProps {
   onCreate?: () => void;
   openExports?: boolean;
   handleReverseRelation?: () => void;
+  controlledDial?: (({ onOpen, onClose }: {
+    onOpen: () => void;
+    onClose: () => void;
+  }) => React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>>)
 }
 interface StixCoreRelationshipCreationFromEntityForm {
   confidence: string;
@@ -255,7 +259,13 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     onCreate = undefined,
     openExports = false,
     handleReverseRelation = undefined,
+    controlledDial = undefined,
   } = props;
+  const { state: {
+    relationshipTypes: initialRelationshipTypes,
+    filters,
+    helpers,
+  }} = useContext(CreateRelationshipContext);
   let isOnlySDOs = false;
   let isOnlySCOs = false;
   let actualTypeFilterValues = [
@@ -290,19 +300,6 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
       ...targetStixCyberObservableTypes,
     ];
   }
-  const actualTypeFilters = actualTypeFilterValues.length > 0
-    ? {
-      mode: 'and',
-      filterGroups: [],
-      filters: [{
-        id: uuid(),
-        key: 'entity_type',
-        values: actualTypeFilterValues,
-        operator: 'eq',
-        mode: 'or',
-      }],
-    }
-    : emptyFilterGroup;
   const classes = useStyles();
   const { t_i18n } = useFormatter();
   const [open, setOpen] = useState(targetEntitiesProps.length !== 0);
@@ -322,7 +319,6 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
   }, [targetEntitiesProps]);
   const [sortBy, setSortBy] = useState('_score');
   const [orderAsc, setOrderAsc] = useState(false);
-  const [filters, helpers] = useFiltersState(actualTypeFilters, actualTypeFilters);
   const [numberOfElements, setNumberOfElements] = useState({
     number: 0,
     symbol: '',
@@ -702,7 +698,9 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     return (
       <UserContext.Consumer>
         {({ schema }) => {
-          const relationshipTypes = R.uniq(R.filter(
+          const relationshipTypes = initialRelationshipTypes.length > 0
+          ? initialRelationshipTypes
+          : R.uniq(R.filter(
             (n) => R.isNil(allowedRelationshipTypes)
             || allowedRelationshipTypes.length === 0
             || allowedRelationshipTypes.includes('stix-core-relationship')
@@ -765,32 +763,41 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     );
   };
 
+  let openElement = controlledDial
+    ? controlledDial({
+        onOpen: () => setOpen(true),
+        onClose: handleClose,
+      })
+    : '';
+  if (variant === 'inLine') {
+    openElement = (
+      <IconButton
+        color="primary"
+        aria-label="Label"
+        onClick={() => setOpen(true)}
+        style={{ float: 'left', margin: '-15px 0 0 -2px' }}
+        size="large"
+      >
+        <Add fontSize="small"/>
+      </IconButton>
+    );
+  } else if (controlledDial === undefined && !openExports) {
+    openElement = (
+      <Fab
+        onClick={() => setOpen(true)}
+        color="primary"
+        aria-label="Add"
+        className={classes.createButton}
+        style={{ right: paddingRight || 30 }}
+      >
+        <Add/>
+      </Fab>
+    );
+  }
+
   return (
     <>
-      {/* eslint-disable-next-line no-nested-ternary */}
-      {variant === 'inLine' ? (
-        <IconButton
-          color="primary"
-          aria-label="Label"
-          onClick={() => setOpen(true)}
-          style={{ float: 'left', margin: '-15px 0 0 -2px' }}
-          size="large"
-        >
-          <Add fontSize="small"/>
-        </IconButton>
-      ) : !openExports ? (
-        <Fab
-          onClick={() => setOpen(true)}
-          color="primary"
-          aria-label="Add"
-          className={classes.createButton}
-          style={{ right: paddingRight || 30 }}
-        >
-          <Add/>
-        </Fab>
-      ) : (
-        ''
-      )}
+      {openElement}
       <Drawer
         open={open}
         anchor="right"

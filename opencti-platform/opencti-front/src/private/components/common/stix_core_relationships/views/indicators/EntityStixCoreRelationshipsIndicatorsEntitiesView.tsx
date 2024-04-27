@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext, useEffect } from 'react';
 import ListLines from '../../../../../../components/list_lines/ListLines';
 import ToolBar from '../../../../data/ToolBar';
 import useEntityToggle from '../../../../../../utils/hooks/useEntityToggle';
@@ -12,8 +12,13 @@ import { DataColumns, PaginationOptions } from '../../../../../../components/lis
 import { StixDomainObjectIndicatorsLinesQuery$data } from '../../../../observations/indicators/__generated__/StixDomainObjectIndicatorsLinesQuery.graphql';
 import useAuth from '../../../../../../utils/hooks/useAuth';
 import { QueryRenderer } from '../../../../../../relay/environment';
-import { isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../../../utils/filters/filtersUtils';
+import { emptyFilterGroup, isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../../../utils/filters/filtersUtils';
 import { FilterGroup } from '../../../../../../utils/filters/filtersHelpers-types';
+import useHelper from 'src/utils/hooks/useHelper';
+import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
+import { computeTargetStixDomainObjectTypes } from 'src/utils/stixTypeUtils';
+import useFiltersState from 'src/utils/filters/useFiltersState';
+import { v4 as uuid } from 'uuid';
 
 interface EntityStixCoreRelationshipsIndicatorsEntitiesViewProps {
   entityId: string
@@ -136,6 +141,37 @@ const EntityStixCoreRelationshipsIndicatorsEntitiesView: FunctionComponent<Entit
   } = useEntityToggle(localStorageKey);
 
   const finalView = currentView || view;
+  const stixDomainObjectTypes = ['Indicator'];
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+  const { setState: setCreateRelationshipContext } = useContext(CreateRelationshipContext);
+  const actualFilters = [
+    ...computeTargetStixDomainObjectTypes(stixDomainObjectTypes),
+  ];
+  const [typeFilters, helpers] = useFiltersState(
+    actualFilters.length > 0
+      ? {
+        mode: 'and',
+        filterGroups: [],
+        filters: [{
+          id: uuid(),
+          key: 'entity_type',
+          values: actualFilters,
+        }]
+      }
+      : emptyFilterGroup
+  );
+  useEffect(() => {
+    setCreateRelationshipContext({
+      relationshipTypes,
+      stixCoreObjectTypes: stixDomainObjectTypes,
+      connectionKey: 'Pagination_indicators',
+      filters: typeFilters,
+      reversed: isRelationReversed,
+      helpers,
+      paginationOptions,
+    });
+  }, []);
   return (
     <>
       <ListLines
@@ -202,20 +238,22 @@ const EntityStixCoreRelationshipsIndicatorsEntitiesView: FunctionComponent<Entit
           'Be careful, you are about to delete the selected entities (not the relationships)',
         )}
       />
-      <Security needs={[KNOWLEDGE_KNUPDATE]}>
-        <StixCoreRelationshipCreationFromEntity
-          entityId={entityId}
-          isRelationReversed={isRelationReversed}
-          targetStixDomainObjectTypes={['Indicator']}
-          allowedRelationshipTypes={relationshipTypes}
-          paginationOptions={paginationOptions}
-          openExports={openExports}
-          paddingRight={220}
-          connectionKey="Pagination_indicators"
-          defaultStartTime={defaultStartTime}
-          defaultStopTime={defaultStopTime}
-        />
-      </Security>
+      {!FABReplaced
+        && <Security needs={[KNOWLEDGE_KNUPDATE]}>
+            <StixCoreRelationshipCreationFromEntity
+              entityId={entityId}
+              isRelationReversed={isRelationReversed}
+              targetStixDomainObjectTypes={stixDomainObjectTypes}
+              allowedRelationshipTypes={relationshipTypes}
+              paginationOptions={paginationOptions}
+              openExports={openExports}
+              paddingRight={220}
+              connectionKey="Pagination_indicators"
+              defaultStartTime={defaultStartTime}
+              defaultStopTime={defaultStopTime}
+            />
+          </Security>
+      }
     </>
   );
 };

@@ -42,6 +42,7 @@ import StixCoreObjectQuickSubscription from '../stix_core_objects/StixCoreObject
 import { getMainRepresentative } from '../../../../utils/defaultRepresentatives';
 import Transition from '../../../../components/Transition';
 import Loader, { LoaderVariant } from '../../../../components/Loader';
+import useHelper from 'src/utils/hooks/useHelper';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -183,10 +184,13 @@ const aliasValidation = (t) => Yup.object().shape({
 const StixDomainObjectHeader = (props) => {
   const classes = useStyles();
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const {
     stixDomainObject,
     isOpenctiAlias,
     PopoverComponent,
+    RelateComponent,
     viewAs,
     onViewAs,
     disablePopover,
@@ -546,6 +550,13 @@ const StixDomainObjectHeader = (props) => {
               })
             )}
           </div>
+          )}
+          {FABReplaced && RelateComponent && (
+            <RelateComponent
+              id={stixDomainObject.id}
+              defaultStartTime={stixDomainObject.first_seen}
+              defaultStopTime={stixDomainObject.last_seen}
+            />
           )}
         </div>
       </div>
