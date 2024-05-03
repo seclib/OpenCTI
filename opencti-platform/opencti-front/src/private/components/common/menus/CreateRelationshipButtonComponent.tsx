@@ -1,12 +1,13 @@
-import React, { FunctionComponent, useContext } from 'react';
-import Security from 'src/utils/Security';
-import { KNOWLEDGE_KNUPDATE } from 'src/utils/hooks/useGranted';
-import { useFormatter } from 'src/components/i18n';
-import { Button, styled } from '@mui/material';
-import { Add } from '@mui/icons-material';
-import { computeTargetStixCyberObservableTypes, computeTargetStixDomainObjectTypes } from 'src/utils/stixTypeUtils';
-import { CreateRelationshipContext } from './CreateRelationshipContextProvider';
-import StixCoreRelationshipCreationFromEntity from '../stix_core_relationships/StixCoreRelationshipCreationFromEntity';
+import React, { FunctionComponent, useContext } from "react";
+import Security from "src/utils/Security";
+import { KNOWLEDGE_KNUPDATE } from "src/utils/hooks/useGranted";
+import StixCoreRelationshipCreationFromEntity from "../stix_core_relationships/StixCoreRelationshipCreationFromEntity";
+import { useFormatter } from "src/components/i18n";
+import { Button, styled } from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { CreateRelationshipContext } from "./CreateRelationshipContextProvider";
+import { computeTargetStixCyberObservableTypes, computeTargetStixDomainObjectTypes } from "src/utils/stixTypeUtils";
+import StixCoreRelationshipCreationFromControlledDial from "../stix_core_relationships/StixCoreRelationshipCreationFromControlledDial";
 
 const CreateRelationshipButton = styled(Button)({
   marginLeft: '3px',
@@ -45,7 +46,7 @@ const CreateRelationshipButtonComponent: FunctionComponent<CreateRelationshipBut
   const stopTime = new Date(defaultStopTime ?? new Date()).toISOString();
   return (
     <Security needs={[KNOWLEDGE_KNUPDATE]}>
-      <StixCoreRelationshipCreationFromEntity
+      {/* <StixCoreRelationshipCreationFromEntity
         entityId={id}
         paginationOptions={paginationOptions ?? {}}
         defaultStartTime={startTime}
@@ -56,6 +57,9 @@ const CreateRelationshipButtonComponent: FunctionComponent<CreateRelationshipBut
         isRelationReversed={reversed ?? false}
         paddingRight={0}
         controlledDial={CreateRelationshipControlledDial}
+      /> */}
+      <StixCoreRelationshipCreationFromControlledDial
+        id={id}
       />
     </Security>
   );

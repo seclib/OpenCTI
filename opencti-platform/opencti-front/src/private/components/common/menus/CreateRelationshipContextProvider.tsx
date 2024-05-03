@@ -39,7 +39,7 @@ const CreateRelationshipContextProvider = ({ children }: { children: ReactNode }
   const [reversed, setReversed] = useState<boolean>(false);
   const [helpers, setHelpers] = useState<handleFilterHelpers>();
   const [paginationOptions, setPaginationOptions] = useState<unknown>();
-  const [onCreate, setOnCreate] = useState<() => void>(() => () => {});
+  const [onCreate, setOnCreate] = useState<() => void>();
   const state = {
     relationshipTypes,
     stixCoreObjectTypes,

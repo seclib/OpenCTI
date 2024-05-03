@@ -85,7 +85,7 @@ interface StixDomainObjectAttackPatternsKillChainComponentProps {
   openExports?: boolean;
   handleToggleExports?: () => void;
   exportContext: { entity_type: string };
-  refetch?: () => {};
+  refetch?: () => void;
 }
 
 const StixDomainObjectAttackPatternsKillChainComponent: FunctionComponent<StixDomainObjectAttackPatternsKillChainComponentProps> = ({
@@ -114,6 +114,7 @@ const StixDomainObjectAttackPatternsKillChainComponent: FunctionComponent<StixDo
   const [currentModeOnlyActive, setCurrentModeOnlyActive] = useState<boolean>(false);
   const [currentColorsReversed, setCurrentColorsReversed] = useState<boolean>(false);
   const [targetEntities, setTargetEntities] = useState<TargetEntity[]>([]);
+  console.log(`attack patterns kill chain got refetch of type: ${typeof refetch}`);
   useEffect(() => {
     setCreateRelationshipContext({
       onCreate: refetch,
@@ -514,7 +515,7 @@ interface StixDomainObjectAttackPatternsKillChainProps {
 export default function StixDomainObjectAttackPatternsKillChain({
   triggerData,
   componentProps,
-}: StixDomainObjectAttackPatternsKillChainProps) {
+}: Readonly<StixDomainObjectAttackPatternsKillChainProps>) {
   const [data, refetch] = useRefetchableFragment<TriggerQuery, FragmentKey>(
     stixDomainObjectAttackPatternsKillChainStixCoreRelationshipsTriggersFragment,
     triggerData,

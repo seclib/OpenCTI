@@ -1,4 +1,5 @@
 import React, { FunctionComponent, useContext, useEffect, useRef, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 import { graphql } from 'react-relay';
 import * as R from 'ramda';
 import Drawer from '@mui/material/Drawer';
@@ -29,7 +30,7 @@ import StixCoreRelationshipCreationForm from './StixCoreRelationshipCreationForm
 import { resolveRelationsTypes } from '../../../../utils/Relation';
 import { UserContext } from '../../../../utils/hooks/useAuth';
 import ListLines from '../../../../components/list_lines/ListLines';
-import { useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../utils/filters/filtersUtils';
+import { emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../utils/filters/filtersUtils';
 import StixCoreRelationshipCreationFromEntityStixCoreObjectsLines, {
   stixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery,
 } from './StixCoreRelationshipCreationFromEntityStixCoreObjectsLines';
@@ -37,6 +38,7 @@ import type { Theme } from '../../../../components/Theme';
 import { ModuleHelper } from '../../../../utils/platformModulesHelper';
 import useEntityToggle from '../../../../utils/hooks/useEntityToggle';
 import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
+import useFiltersState from 'src/utils/filters/useFiltersState';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -90,7 +92,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
   },
 }));
 
-const stixCoreRelationshipCreationFromEntityQuery = graphql`
+export const stixCoreRelationshipCreationFromEntityQuery = graphql`
   query StixCoreRelationshipCreationFromEntityQuery($id: String!) {
     stixCoreObject(id: $id) {
       id
@@ -187,7 +189,7 @@ const stixCoreRelationshipCreationFromEntityQuery = graphql`
   }
 `;
 
-const stixCoreRelationshipCreationFromEntityFromMutation = graphql`
+export const stixCoreRelationshipCreationFromEntityFromMutation = graphql`
   mutation StixCoreRelationshipCreationFromEntityFromMutation(
     $input: StixCoreRelationshipAddInput!
   ) {
@@ -197,7 +199,7 @@ const stixCoreRelationshipCreationFromEntityFromMutation = graphql`
   }
 `;
 
-const stixCoreRelationshipCreationFromEntityToMutation = graphql`
+export const stixCoreRelationshipCreationFromEntityToMutation = graphql`
   mutation StixCoreRelationshipCreationFromEntityToMutation(
     $input: StixCoreRelationshipAddInput!
   ) {
@@ -228,7 +230,7 @@ interface StixCoreRelationshipCreationFromEntityProps {
     onClose: () => void;
   }) => React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>>)
 }
-interface StixCoreRelationshipCreationFromEntityForm {
+export interface StixCoreRelationshipCreationFromEntityForm {
   confidence: string;
   start_time: string;
   stop_time: string;
@@ -237,7 +239,7 @@ interface StixCoreRelationshipCreationFromEntityForm {
   objectMarking: Option[];
   externalReferences: Option[];
 }
-interface TargetEntity {
+export interface TargetEntity {
   id: string;
   entity_type: string;
 }
@@ -262,10 +264,9 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
   } = props;
   const { state: {
     relationshipTypes: initialRelationshipTypes,
-    filters,
-    helpers,
-    onCreate: createRelationshipOnCreate,
-  } } = useContext(CreateRelationshipContext);
+    // filters,
+    // helpers,
+  }} = useContext(CreateRelationshipContext);
   let isOnlySDOs = false;
   let isOnlySCOs = false;
   let actualTypeFilterValues = [
@@ -300,6 +301,19 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
       ...targetStixCyberObservableTypes,
     ];
   }
+  const actualTypeFilters = actualTypeFilterValues.length > 0
+    ? {
+      mode: 'and',
+      filterGroups: [],
+      filters: [{
+        id: uuid(),
+        key: 'entity_type',
+        values: actualTypeFilterValues,
+        operator: 'eq',
+        mode: 'or',
+      }],
+    }
+    : emptyFilterGroup;
   const classes = useStyles();
   const { t_i18n } = useFormatter();
   const [open, setOpen] = useState(targetEntitiesProps.length !== 0);
@@ -319,6 +333,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
   }, [targetEntitiesProps]);
   const [sortBy, setSortBy] = useState('_score');
   const [orderAsc, setOrderAsc] = useState(false);
+  const [filters, helpers] = useFiltersState(actualTypeFilters, actualTypeFilters);
   const [numberOfElements, setNumberOfElements] = useState({
     number: 0,
     symbol: '',
@@ -368,7 +383,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
           : stixCoreRelationshipCreationFromEntityFromMutation,
         variables: { input: finalValues },
         updater: (store: RecordSourceSelectorProxy) => {
-          if (typeof onCreate !== 'function' && typeof createRelationshipOnCreate !== 'function') {
+          if (typeof onCreate !== 'function') {
             const userProxy = store.get(store.getRoot().getDataID());
             const payload = store.getRootField('stixCoreRelationshipAdd');
 
@@ -440,9 +455,6 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     handleClose();
     if (typeof onCreate === 'function') {
       onCreate();
-    } else if (typeof createRelationshipOnCreate === 'function') {
-      console.log('calling createRelationshipOnCreate');
-      createRelationshipOnCreate();
     }
     return true;
   };
@@ -701,10 +713,10 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     return (
       <UserContext.Consumer>
         {({ schema }) => {
-          const relationshipTypes = initialRelationshipTypes.length > 0
-            ? initialRelationshipTypes
-            : R.uniq(R.filter(
-              (n) => R.isNil(allowedRelationshipTypes)
+          const relationshipTypes = (initialRelationshipTypes ?? []).length > 0
+          ? initialRelationshipTypes
+          : R.uniq(R.filter(
+            (n) => R.isNil(allowedRelationshipTypes)
             || allowedRelationshipTypes.length === 0
             || allowedRelationshipTypes.includes('stix-core-relationship')
             || allowedRelationshipTypes.includes(n),
