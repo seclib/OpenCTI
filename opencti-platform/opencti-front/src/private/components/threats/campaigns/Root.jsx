@@ -23,6 +23,8 @@ import StixCoreObjectKnowledgeBar from '../../common/stix_core_objects/StixCoreO
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootCampaignSubscription($id: ID!) {
@@ -90,7 +92,7 @@ class RootCampaign extends Component {
 
     const link = `/dashboard/threats/campaigns/${campaignId}/knowledge`;
     return (
-      <div>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route
             path="/knowledge/*"
@@ -137,6 +139,7 @@ class RootCampaign extends Component {
                       entityType="Campaign"
                       stixDomainObject={campaign}
                       PopoverComponent={<CampaignPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                     />
                     <Box
@@ -249,7 +252,7 @@ class RootCampaign extends Component {
             return <Loader />;
           }}
         />
-      </div>
+      </CreateRelationshipContextProvider>
     );
   }
 }

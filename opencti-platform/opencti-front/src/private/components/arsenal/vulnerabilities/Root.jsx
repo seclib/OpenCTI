@@ -22,6 +22,8 @@ import ErrorNotFound from '../../../../components/ErrorNotFound';
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
 
 const subscription = graphql`
   subscription RootVulnerabilitySubscription($id: ID!) {
@@ -88,7 +90,7 @@ class RootVulnerability extends Component {
     } = this.props;
     const link = `/dashboard/arsenal/vulnerabilities/${vulnerabilityId}/knowledge`;
     return (
-      <div>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route path="/knowledge/*" element={<StixCoreObjectKnowledgeBar
             stixCoreObjectLink={link}
@@ -130,6 +132,7 @@ class RootVulnerability extends Component {
                       entityType="Vulnerability"
                       stixDomainObject={vulnerability}
                       PopoverComponent={<VulnerabilityPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                       isOpenctiAlias={true}
                     />
@@ -251,7 +254,7 @@ class RootVulnerability extends Component {
             return <Loader />;
           }}
         />
-      </div>
+      </CreateRelationshipContextProvider>
     );
   }
 }

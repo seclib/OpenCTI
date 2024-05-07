@@ -22,6 +22,8 @@ import ErrorNotFound from '../../../../components/ErrorNotFound';
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootNarrativeSubscription($id: ID!) {
@@ -89,7 +91,7 @@ class RootNarrative extends Component {
 
     const link = `/dashboard/techniques/narratives/${narrativeId}/knowledge`;
     return (
-      <>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route
             path="/knowledge/*"
@@ -130,6 +132,7 @@ class RootNarrative extends Component {
                       disableSharing={true}
                       stixDomainObject={props.narrative}
                       PopoverComponent={<NarrativePopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                     />
                     <Box
                       sx={{
@@ -238,7 +241,7 @@ class RootNarrative extends Component {
             return <Loader />;
           }}
         />
-      </>
+      </CreateRelationshipContextProvider>
     );
   }
 }

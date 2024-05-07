@@ -20,6 +20,8 @@ import CourseOfActionKnowledge from './CourseOfActionKnowledge';
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
 
 const subscription = graphql`
   subscription RootCoursesOfActionSubscription($id: ID!) {
@@ -84,7 +86,7 @@ class RootCourseOfAction extends Component {
     } = this.props;
 
     return (
-      <div>
+      <CreateRelationshipContextProvider>
         <QueryRenderer
           query={courseOfActionQuery}
           variables={{ id: courseOfActionId }}
@@ -106,6 +108,7 @@ class RootCourseOfAction extends Component {
                       disableSharing={true}
                       stixDomainObject={courseOfAction}
                       PopoverComponent={<CourseOfActionPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       isOpenctiAlias={true}
                     />
                     <Box
@@ -191,7 +194,7 @@ class RootCourseOfAction extends Component {
             return <Loader />;
           }}
         />
-      </div>
+      </CreateRelationshipContextProvider>
     );
   }
 }

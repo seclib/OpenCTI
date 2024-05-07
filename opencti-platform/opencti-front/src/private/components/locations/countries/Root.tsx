@@ -26,6 +26,8 @@ import { useFormatter } from '../../../../components/i18n';
 import CountryPopover from './CountryPopover';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootCountriesSubscription($id: ID!) {
@@ -83,7 +85,7 @@ const RootCountryComponent = ({ queryRef, countryId, link }) => {
   const { country, connectorsForImport, connectorsForExport } = data;
   const paddingRight = getPaddingRight(location.pathname, country?.id, '/dashboard/locations/countries');
   return (
-    <>
+    <CreateRelationshipContextProvider>
       {country ? (
         <div style={{ paddingRight }}>
           <Breadcrumbs variant="object" elements={[
@@ -97,6 +99,7 @@ const RootCountryComponent = ({ queryRef, countryId, link }) => {
             disableSharing={true}
             stixDomainObject={country}
             PopoverComponent={<CountryPopover id={country.id} />}
+            RelateComponent={CreateRelationshipButtonComponent}
             enableQuickSubscription={true}
             isOpenctiAlias={true}
           />
@@ -218,7 +221,7 @@ const RootCountryComponent = ({ queryRef, countryId, link }) => {
       ) : (
         <ErrorNotFound />
       )}
-    </>
+    </CreateRelationshipContextProvider>
   );
 };
 
