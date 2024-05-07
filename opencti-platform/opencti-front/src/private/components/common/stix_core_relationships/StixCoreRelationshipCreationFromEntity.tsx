@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useContext, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { graphql } from 'react-relay';
 import * as R from 'ramda';
@@ -20,6 +20,7 @@ import {
 } from '@components/common/stix_core_relationships/__generated__/StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery.graphql';
 import { FormikConfig } from 'formik/dist/types';
 import { Option } from '@components/common/form/ReferenceField';
+import useFiltersState from 'src/utils/filters/useFiltersState';
 import { commitMutation, handleErrorInForm, QueryRenderer } from '../../../../relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import { formatDate } from '../../../../utils/Time';
@@ -37,8 +38,6 @@ import StixCoreRelationshipCreationFromEntityStixCoreObjectsLines, {
 import type { Theme } from '../../../../components/Theme';
 import { ModuleHelper } from '../../../../utils/platformModulesHelper';
 import useEntityToggle from '../../../../utils/hooks/useEntityToggle';
-import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
-import useFiltersState from 'src/utils/filters/useFiltersState';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -262,11 +261,6 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     handleReverseRelation = undefined,
     controlledDial = undefined,
   } = props;
-  const { state: {
-    relationshipTypes: initialRelationshipTypes,
-    // filters,
-    // helpers,
-  }} = useContext(CreateRelationshipContext);
   let isOnlySDOs = false;
   let isOnlySCOs = false;
   let actualTypeFilterValues = [
@@ -713,9 +707,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     return (
       <UserContext.Consumer>
         {({ schema }) => {
-          const relationshipTypes = (initialRelationshipTypes ?? []).length > 0
-          ? initialRelationshipTypes
-          : R.uniq(R.filter(
+          const relationshipTypes = R.uniq(R.filter(
             (n) => R.isNil(allowedRelationshipTypes)
             || allowedRelationshipTypes.length === 0
             || allowedRelationshipTypes.includes('stix-core-relationship')

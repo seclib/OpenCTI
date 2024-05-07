@@ -1,26 +1,37 @@
 import React, { FunctionComponent, useContext, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import Drawer from '../drawer/Drawer';
 import { useFormatter } from 'src/components/i18n';
-import { Button, CircularProgress, Fab, styled } from '@mui/material';
+import { Button, CircularProgress, Fab, Typography, styled } from '@mui/material';
 import { Add, ChevronRightOutlined } from '@mui/icons-material';
-import { StixCoreRelationshipCreationFromEntityForm, TargetEntity, stixCoreRelationshipCreationFromEntityFromMutation, stixCoreRelationshipCreationFromEntityQuery, stixCoreRelationshipCreationFromEntityToMutation } from './StixCoreRelationshipCreationFromEntity';
 import { QueryRenderer, commitMutation, handleErrorInForm } from 'src/relay/environment';
-import { StixCoreRelationshipCreationFromEntityQuery$data } from './__generated__/StixCoreRelationshipCreationFromEntityQuery.graphql';
 import { UserContext } from 'src/utils/hooks/useAuth';
 import ListLines from 'src/components/list_lines/ListLines';
-import StixCoreRelationshipCreationFromEntityStixCoreObjectsLines, { stixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery } from './StixCoreRelationshipCreationFromEntityStixCoreObjectsLines';
-import { StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery$data } from './__generated__/StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery.graphql';
-import { emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from 'src/utils/filters/filtersUtils';
-import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
+import { FilterGroup, emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from 'src/utils/filters/filtersUtils';
 import useFiltersState from 'src/utils/filters/useFiltersState';
 import useEntityToggle from 'src/utils/hooks/useEntityToggle';
-import StixCoreRelationshipCreationForm from './StixCoreRelationshipCreationForm';
 import { resolveRelationsTypes } from 'src/utils/Relation';
 import { ConnectionHandler, RecordSourceSelectorProxy } from 'relay-runtime';
 import { isNodeInConnection } from 'src/utils/store';
 import { FormikConfig } from 'formik';
 import { formatDate } from 'src/utils/Time';
+import { computeTargetStixCyberObservableTypes, computeTargetStixDomainObjectTypes } from 'src/utils/stixTypeUtils';
+import StixCyberObservableCreation from '@components/observations/stix_cyber_observables/StixCyberObservableCreation';
+import StixDomainObjectCreation from '../stix_domain_objects/StixDomainObjectCreation';
+import StixCoreRelationshipCreationForm from './StixCoreRelationshipCreationForm';
+import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
+import StixCoreRelationshipCreationFromEntityStixCoreObjectsLines, {
+  stixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery,
+} from './StixCoreRelationshipCreationFromEntityStixCoreObjectsLines';
+import { StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery$data } from './__generated__/StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery.graphql';
+import {
+  StixCoreRelationshipCreationFromEntityForm,
+  TargetEntity,
+  stixCoreRelationshipCreationFromEntityFromMutation,
+  stixCoreRelationshipCreationFromEntityQuery,
+  stixCoreRelationshipCreationFromEntityToMutation,
+} from './StixCoreRelationshipCreationFromEntity';
+import { StixCoreRelationshipCreationFromEntityQuery$data } from './__generated__/StixCoreRelationshipCreationFromEntityQuery.graphql';
+import Drawer from '../drawer/Drawer';
 
 const ViewContainer = styled('div')({ minHeight: '100%' });
 
@@ -34,27 +45,136 @@ const ContinueButton = styled(Fab)({
   bottom: 40,
   right: 30,
   zIndex: 1001,
-})
-
-const CreateRelationshipButton = styled(Button)({
-  marginLeft: '3px',
-  fontSize: 'small',
 });
+
+const StyledButton = styled(Button)<{ marginRight?: string }>(({ marginRight }) => ({
+  marginLeft: '3px',
+  marginRight: marginRight ?? undefined,
+  fontSize: 'small',
+}));
 
 const CreateRelationshipControlledDial = ({ onOpen }: {
   onOpen: () => void
 }) => {
   const { t_i18n } = useFormatter();
   return (
-    <CreateRelationshipButton
+    <StyledButton
       onClick={onOpen}
       variant='contained'
       disableElevation
       aria-label={t_i18n('Create Relationship')}
     >
       {t_i18n('Create Relationship')} <Add />
-    </CreateRelationshipButton>
+    </StyledButton>
   );
+};
+
+interface HeaderProps {
+  showCreates: boolean,
+  t: (s: string) => string,
+}
+
+// Custom header prop for entity/observable creation buttons in initial step
+const Header: FunctionComponent<HeaderProps> = ({
+  showCreates,
+  t,
+}) => {
+  const StyledHeader = styled('div')({
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  });
+
+  const [openCreateEntity, setOpenCreateEntity] = useState<boolean>(false);
+  const [openCreateObservable, setOpenCreateObservable] = useState<boolean>(false);
+  const { state: { stixCoreObjectTypes } } = useContext(CreateRelationshipContext);
+  const targetEntityTypes = (stixCoreObjectTypes ?? []).length > 0 ? stixCoreObjectTypes ?? ['Stix-Core-Object'] : ['Stix-Core-Object'];
+  const targetStixDomainObjectTypes = computeTargetStixDomainObjectTypes(targetEntityTypes);
+  const targetStixCyberObservableTypes = computeTargetStixCyberObservableTypes(targetEntityTypes);
+  const showSDOCreation = targetStixDomainObjectTypes.length > 0;
+  const showSCOCreation = targetStixCyberObservableTypes.length > 0;
+
+  const handleOpenCreateEntity = () => setOpenCreateEntity(true);
+  const handleCloseCreateEntity = () => setOpenCreateEntity(false);
+  const handleOpenCreateObservable = () => setOpenCreateObservable(true);
+  const handleCloseCreateObservable = () => setOpenCreateObservable(false);
+
+  const entityTypes = [
+    ...targetStixDomainObjectTypes,
+    ...targetStixCyberObservableTypes,
+  ];
+  const filters: FilterGroup = {
+    mode: 'and',
+    filterGroups: [],
+    filters: [{
+      id: uuid(),
+      key: 'entity_type',
+      values: entityTypes,
+      operator: 'eq',
+      mode: 'or',
+    }],
+  };
+  const searchPaginationOptions = {
+    search: '',
+    filters: useRemoveIdAndIncorrectKeysFromFilterGroupObject(filters, entityTypes),
+    orderBy: '_score',
+    orderMode: 'desc',
+  };
+
+  return (<StyledHeader>
+    <Typography variant='subtitle2'>{t('Create a relationship')}</Typography>
+    {showCreates
+      && <div>
+        {showSDOCreation && <StyledButton
+          onClick={handleOpenCreateEntity}
+          variant='contained'
+          disableElevation
+          size='small'
+          aria-label={t('Create an entity')}
+          marginRight={showSCOCreation ? undefined : '15px'}
+                            >
+          {t('Create an entity')} <Add />
+        </StyledButton>}
+        {showSCOCreation && <StyledButton
+          onClick={handleOpenCreateObservable}
+          variant='contained'
+          disableElevation
+          size='small'
+          aria-label={t('Create an observable')}
+          marginRight={'15px'}
+                            >
+          {t('Create an observable')} <Add />
+        </StyledButton>}
+        <StixDomainObjectCreation
+          display={true}
+          inputValue={''}
+          paginationKey="Pagination_stixCoreObjects"
+          paginationOptions={searchPaginationOptions}
+          speeddial={true}
+          open={openCreateEntity}
+          handleClose={handleCloseCreateEntity}
+          creationCallback={undefined}
+          confidence={undefined}
+          defaultCreatedBy={undefined}
+          defaultMarkingDefinitions={undefined}
+          stixDomainObjectTypes={entityTypes}
+        />
+        <StixCyberObservableCreation
+          display={true}
+          contextual={true}
+          inputValue={''}
+          paginationKey="Pagination_stixCoreObjects"
+          paginationOptions={searchPaginationOptions}
+          speeddial={true}
+          open={openCreateObservable}
+          handleClose={handleCloseCreateObservable}
+          type={undefined}
+        />
+      </div>
+    }
+  </StyledHeader>);
 };
 
 const renderLoader = () => {
@@ -90,7 +210,7 @@ const SelectEntity = ({
   handleNextStep: () => void,
 }) => {
   const { t_i18n } = useFormatter();
-  const { state: { stixCoreObjectTypes }} = useContext(CreateRelationshipContext);
+  const { state: { stixCoreObjectTypes } } = useContext(CreateRelationshipContext);
   const { platformModuleHelpers } = useContext(UserContext);
   const typeFilters = (stixCoreObjectTypes ?? []).length > 0
     ? {
@@ -106,7 +226,7 @@ const SelectEntity = ({
     }
     : emptyFilterGroup;
   const [filters, helpers] = useFiltersState(typeFilters, typeFilters);
-  let virtualEntityTypes = ['Stix-Domain-Object', 'Stix-Cyber-Observable'];
+  const virtualEntityTypes = ['Stix-Domain-Object', 'Stix-Cyber-Observable'];
   const [sortBy, setSortBy] = useState<string>('_score');
   const [orderAsc, setOrderAsc] = useState<boolean>(false);
   const [numberOfElements, setNumberOfElements] = useState({
@@ -123,14 +243,14 @@ const SelectEntity = ({
   const onInstanceToggleEntity = (entity: TargetEntity) => {
     onToggleEntity(entity);
     if (entity.id in (selectedElements || {})) {
-      const newSelectedElements = { ... selectedElements };
+      const newSelectedElements = { ...selectedElements };
       delete newSelectedElements[entity.id];
       setTargetEntities(Object.values(newSelectedElements));
     } else {
       setTargetEntities(Object.values({
         [entity.id]: entity,
-        ...(selectedElements ?? {})
-      }))
+        ...(selectedElements ?? {}),
+      }));
     }
   };
   const searchPaginationOptions = {
@@ -251,15 +371,14 @@ const RenderForm = ({
     onCreate,
     connectionKey,
     paginationOptions,
-  }} = useContext(CreateRelationshipContext);
+  } } = useContext(CreateRelationshipContext);
   const { schema } = useContext(UserContext);
   const [reversed, setReversed] = useState<boolean>(initiallyReversed ?? false);
-  console.log(`create relationship button got onCreate of type: ${typeof onCreate}`);
 
   const handleReverse = () => setReversed(!reversed);
 
   let fromEntities = [sourceEntity];
-  let toEntities = targetEntities
+  let toEntities = targetEntities;
   if (reversed) {
     fromEntities = targetEntities;
     toEntities = [sourceEntity];
@@ -276,56 +395,58 @@ const RenderForm = ({
     (relType) => allowedRelationshipTypes === undefined
       || allowedRelationshipTypes.length === 0
       || allowedRelationshipTypes.includes('stix-core-relationship')
-      || allowedRelationshipTypes.includes(relType)
+      || allowedRelationshipTypes.includes(relType),
   );
-  const startTime = defaultStartTime ?? (new Date).toISOString();
-  const stopTime = defaultStopTime ?? (new Date).toISOString();
+  const startTime = defaultStartTime ?? (new Date()).toISOString();
+  const stopTime = defaultStopTime ?? (new Date()).toISOString();
 
   const commit = (finalValues: object) => {
-    return new Promise((resolve, reject) => commitMutation({
-      mutation: reversed
-        ? stixCoreRelationshipCreationFromEntityToMutation
-        : stixCoreRelationshipCreationFromEntityFromMutation,
-      variables: { input: finalValues },
-      updater: (store: RecordSourceSelectorProxy) => {
-        if (typeof onCreate !== 'function') {
-          const userProxy = store.get(store.getRoot().getDataID());
-          const payload = store.getRootField('stixCoreRelationshipAdd');
+    return new Promise((resolve, reject) => {
+      commitMutation({
+        mutation: reversed
+          ? stixCoreRelationshipCreationFromEntityToMutation
+          : stixCoreRelationshipCreationFromEntityFromMutation,
+        variables: { input: finalValues },
+        updater: (store: RecordSourceSelectorProxy) => {
+          if (typeof onCreate !== 'function') {
+            const userProxy = store.get(store.getRoot().getDataID());
+            const payload = store.getRootField('stixCoreRelationshipAdd');
 
-          const fromOrTo = reversed ? 'from' : 'to';
-          const createdNode = connectionKey && payload !== null
-            ? payload.getLinkedRecord(fromOrTo)
-            : payload;
-          const connKey = connectionKey ?? 'Pagination_stixCoreRelationships';
-          // When using connectionKey we use less props of PaginationOptions, we need to filter them
-          let conn;
-          if (userProxy && paginationOptions) {
-            conn = ConnectionHandler.getConnection(
-              userProxy,
-              connKey,
-              paginationOptions,
-            );
-          }
+            const fromOrTo = reversed ? 'from' : 'to';
+            const createdNode = connectionKey && payload !== null
+              ? payload.getLinkedRecord(fromOrTo)
+              : payload;
+            const connKey = connectionKey ?? 'Pagination_stixCoreRelationships';
+            // When using connectionKey we use less props of PaginationOptions, we need to filter them
+            let conn;
+            if (userProxy && paginationOptions) {
+              conn = ConnectionHandler.getConnection(
+                userProxy,
+                connKey,
+                paginationOptions,
+              );
+            }
 
-          if (conn && payload !== null
-            && !isNodeInConnection(payload, conn)
-              && !isNodeInConnection(payload.getLinkedRecord(fromOrTo), conn)
-          ) {
-            const newEdge = payload.setLinkedRecord(createdNode, 'node');
-            ConnectionHandler.insertEdgeBefore(conn, newEdge);
+            if (conn && payload !== null
+              && !isNodeInConnection(payload, conn)
+                && !isNodeInConnection(payload.getLinkedRecord(fromOrTo), conn)
+            ) {
+              const newEdge = payload.setLinkedRecord(createdNode, 'node');
+              ConnectionHandler.insertEdgeBefore(conn, newEdge);
+            }
           }
-        }
-      },
-      optimisticUpdater: undefined,
-      setSubmitting: undefined,
-      optimisticResponse: undefined,
-      onError: (error: Error) => {
-        reject(error);
-      },
-      onCompleted: (response: Response) => {
-        resolve(response);
-      },
-    }));
+        },
+        optimisticUpdater: undefined,
+        setSubmitting: undefined,
+        optimisticResponse: undefined,
+        onError: (error: Error) => {
+          reject(error);
+        },
+        onCompleted: (response: Response) => {
+          resolve(response);
+        },
+      });
+    });
   };
 
   const onSubmit: FormikConfig<StixCoreRelationshipCreationFromEntityForm>['onSubmit'] = async (values, { setSubmitting, setErrors, resetForm }) => {
@@ -406,9 +527,13 @@ const StixCoreRelationshipCreationFromControlledDial: FunctionComponent<StixCore
 
   return (
     <Drawer
-      title={t_i18n('Create a relationship')}
+      title={''} // Defined in custom header prop
       controlledDial={CreateRelationshipControlledDial}
       onClose={reset}
+      header={<Header
+        showCreates={step === 0}
+        t={t_i18n}
+              />}
     >
       <QueryRenderer
         query={stixCoreRelationshipCreationFromEntityQuery}

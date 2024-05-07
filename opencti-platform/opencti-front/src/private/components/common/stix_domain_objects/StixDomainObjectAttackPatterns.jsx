@@ -1,6 +1,4 @@
 import React, { useContext, useEffect } from 'react';
-import useFiltersState from 'src/utils/filters/useFiltersState';
-import { v4 as uuid } from 'uuid';
 import { useLazyLoadQuery } from 'react-relay';
 import { styled } from '@mui/material';
 import Loader from '../../../../components/Loader';
@@ -48,22 +46,9 @@ const StixDomainObjectAttackPatterns = ({
     filterGroups: userFilters && isFilterGroupNotEmpty(userFilters) ? [userFilters] : [],
   };
   const queryPaginationOptions = { ...paginationOptions, filters: contextFilters };
-  const [typeFilters, typeHelpers] = useFiltersState({
-    mode: 'and',
-    filterGroups: [],
-    filters: [{
-      id: uuid(),
-      key: 'entity_type',
-      values: ['Attack-Pattern'],
-      operator: 'eq',
-      mode: 'or',
-    }],
-  });
   useEffect(() => {
     setCreateRelationshipContext({
       stixCoreObjectTypes: ['Attack-Pattern'],
-      filters: typeFilters,
-      helpers: typeHelpers,
       paginationOptions: queryPaginationOptions,
     });
   }, []);

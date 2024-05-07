@@ -27,7 +27,6 @@ import {
   StixDomainObjectAttackPatternsKillChain_triggers$data,
 } from './__generated__/StixDomainObjectAttackPatternsKillChain_triggers.graphql';
 import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
-import StixCoreObjectsExports from '../stix_core_objects/StixCoreObjectsExports';
 
 const StyledParameters = styled('div')({
   marginBottom: 20,
@@ -114,7 +113,6 @@ const StixDomainObjectAttackPatternsKillChainComponent: FunctionComponent<StixDo
   const [currentModeOnlyActive, setCurrentModeOnlyActive] = useState<boolean>(false);
   const [currentColorsReversed, setCurrentColorsReversed] = useState<boolean>(false);
   const [targetEntities, setTargetEntities] = useState<TargetEntity[]>([]);
-  console.log(`attack patterns kill chain got refetch of type: ${typeof refetch}`);
   useEffect(() => {
     setCreateRelationshipContext({
       onCreate: refetch,

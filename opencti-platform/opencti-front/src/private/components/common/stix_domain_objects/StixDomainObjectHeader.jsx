@@ -24,7 +24,7 @@ import MenuItem from '@mui/material/MenuItem';
 import * as R from 'ramda';
 import * as Yup from 'yup';
 import makeStyles from '@mui/styles/makeStyles';
-import useHelper from 'src/utils/hooks/useHelper';
+import useHelper from '../../../../utils/hooks/useHelper';
 import { stixCoreObjectQuickSubscriptionContentQuery } from '../stix_core_objects/stixCoreObjectTriggersUtils';
 import StixCoreObjectAskAI from '../stix_core_objects/StixCoreObjectAskAI';
 import StixCoreObjectSubscribers from '../stix_core_objects/StixCoreObjectSubscribers';
@@ -554,8 +554,6 @@ const StixDomainObjectHeader = (props) => {
           {FABReplaced && RelateComponent && (
             <RelateComponent
               id={stixDomainObject.id}
-              defaultStartTime={stixDomainObject.first_seen}
-              defaultStopTime={stixDomainObject.last_seen}
             />
           )}
         </div>

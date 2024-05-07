@@ -1,8 +1,6 @@
 import React, { FunctionComponent, useContext, useEffect } from 'react';
 import useHelper from 'src/utils/hooks/useHelper';
 import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
-import useFiltersState from 'src/utils/filters/useFiltersState';
-import { v4 as uuid } from 'uuid';
 import useAuth from '../../../../../utils/hooks/useAuth';
 import ListLines from '../../../../../components/list_lines/ListLines';
 import { QueryRenderer } from '../../../../../relay/environment';
@@ -17,7 +15,7 @@ import Security from '../../../../../utils/Security';
 import { computeTargetStixCyberObservableTypes, computeTargetStixDomainObjectTypes, isStixCyberObservables } from '../../../../../utils/stixTypeUtils';
 import { PaginationLocalStorage } from '../../../../../utils/hooks/useLocalStorage';
 import { DataColumns, PaginationOptions } from '../../../../../components/list_lines';
-import { emptyFilterGroup, isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../../utils/filters/filtersUtils';
+import { isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../../utils/filters/filtersUtils';
 import { FilterGroup } from '../../../../../utils/filters/filtersHelpers-types';
 
 interface EntityStixCoreRelationshipsRelationshipsViewProps {
@@ -164,30 +162,11 @@ const EntityStixCoreRelationshipsRelationshipsView: FunctionComponent<EntityStix
   const { isFeatureEnable } = useHelper();
   const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const { setState: setCreateRelationshipContext } = useContext(CreateRelationshipContext);
-  const actualFilters = [
-    ...computeTargetStixDomainObjectTypes(stixCoreObjectTypes),
-    ...computeTargetStixCyberObservableTypes(stixCoreObjectTypes),
-  ];
-  const [typeFilters, helpers] = useFiltersState(
-    actualFilters.length > 0
-      ? {
-        mode: 'and',
-        filterGroups: [],
-        filters: [{
-          id: uuid(),
-          key: 'entity_type',
-          values: actualFilters,
-        }],
-      }
-      : emptyFilterGroup,
-  );
   useEffect(() => {
     setCreateRelationshipContext({
       relationshipTypes,
       stixCoreObjectTypes,
-      filters: typeFilters,
       reversed: isRelationReversed,
-      helpers,
       paginationOptions,
     });
   }, []);
