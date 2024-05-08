@@ -507,6 +507,7 @@ interface StixCoreRelationshipCreationFromControlledDialProps {
   isReversable?: boolean,
   defaultStartTime?: string,
   defaultStopTime?: string,
+  controlledDial?: ({ onOpen }: { onOpen: () => void }) => React.ReactElement,
 }
 
 const StixCoreRelationshipCreationFromControlledDial: FunctionComponent<StixCoreRelationshipCreationFromControlledDialProps> = ({
@@ -515,6 +516,7 @@ const StixCoreRelationshipCreationFromControlledDial: FunctionComponent<StixCore
   isReversable = false,
   defaultStartTime,
   defaultStopTime,
+  controlledDial,
 }) => {
   const { t_i18n } = useFormatter();
   const [step, setStep] = useState<number>(0);
@@ -528,7 +530,7 @@ const StixCoreRelationshipCreationFromControlledDial: FunctionComponent<StixCore
   return (
     <Drawer
       title={''} // Defined in custom header prop
-      controlledDial={CreateRelationshipControlledDial}
+      controlledDial={controlledDial ?? CreateRelationshipControlledDial}
       onClose={reset}
       header={<Header
         showCreates={step === 0}
