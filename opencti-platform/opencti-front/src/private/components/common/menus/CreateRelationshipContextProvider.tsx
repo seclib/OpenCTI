@@ -54,7 +54,7 @@ const CreateRelationshipContextProvider = ({ children }: { children: ReactNode }
     if (updatedConnectionKey) setConnectionKey(updatedConnectionKey);
     if (updatedReversed) setReversed(updatedReversed);
     if (updatedPaginationOptions) setPaginationOptions(updatedPaginationOptions);
-    if (updatedOnCreate) setOnCreate(updatedOnCreate);
+    if (updatedOnCreate) setOnCreate(() => updatedOnCreate); // Dispatching inner function to let context consumer call the onCreate function
   };
   const values = useMemo<CreateRelationshipContextType>(() => ({
     state,

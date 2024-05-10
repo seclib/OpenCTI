@@ -327,7 +327,7 @@ const StixDomainObjectAttackPatternsKillChainComponent: FunctionComponent<StixDo
             coursesOfAction={true}
           />
         )}
-        {!FABReplaced && <Security needs={[KNOWLEDGE_KNUPDATE]}>
+        {FABReplaced && <Security needs={[KNOWLEDGE_KNUPDATE]}>
           <StixCoreRelationshipCreationFromEntity
             entityId={stixDomainObjectId}
             isRelationReversed={false}

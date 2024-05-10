@@ -282,7 +282,6 @@ StixNestedRefRelationshipCreationFromEntityFablessProps
   defaultStopTime,
   controlledDial,
 }) => {
-  const { t_i18n } = useFormatter();
   const [step, setStep] = useState<number>(0);
   const [targetEntities, setTargetEntities] = useState<TargetEntity[]>([]);
 
@@ -296,7 +295,7 @@ StixNestedRefRelationshipCreationFromEntityFablessProps
       title={''} // Defined in custom header prop
       controlledDial={controlledDial ?? CreateRelationshipControlledDial}
       onClose={reset}
-      header={<Header showCreates={step === 0} t={t_i18n} />}
+      header={<Header showCreates={step === 0} />}
     >
       <ViewContainer>
         {step === 0 && (

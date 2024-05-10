@@ -71,14 +71,13 @@ export const CreateRelationshipControlledDial = ({ onOpen }: {
 
 interface HeaderProps {
   showCreates: boolean,
-  t: (s: string) => string,
 }
 
 // Custom header prop for entity/observable creation buttons in initial step
 export const Header: FunctionComponent<HeaderProps> = ({
   showCreates,
-  t,
 }) => {
+  const { t_i18n } = useFormatter();
   const StyledHeader = styled('div')({
     width: '100%',
     display: 'flex',
@@ -124,7 +123,7 @@ export const Header: FunctionComponent<HeaderProps> = ({
   };
 
   return (<StyledHeader>
-    <Typography variant='subtitle2'>{t('Create a relationship')}</Typography>
+    <Typography variant='subtitle2'>{t_i18n('Create a relationship')}</Typography>
     {showCreates
       && <div>
         {showSDOCreation && <StyledButton
@@ -132,20 +131,20 @@ export const Header: FunctionComponent<HeaderProps> = ({
           variant='contained'
           disableElevation
           size='small'
-          aria-label={t('Create an entity')}
+          aria-label={t_i18n('Create an entity')}
           marginRight={showSCOCreation ? undefined : '15px'}
                             >
-          {t('Create an entity')} <Add />
+          {t_i18n('Create an entity')} <Add />
         </StyledButton>}
         {showSCOCreation && <StyledButton
           onClick={handleOpenCreateObservable}
           variant='contained'
           disableElevation
           size='small'
-          aria-label={t('Create an observable')}
+          aria-label={t_i18n('Create an observable')}
           marginRight={'15px'}
                             >
-          {t('Create an observable')} <Add />
+          {t_i18n('Create an observable')} <Add />
         </StyledButton>}
         <StixDomainObjectCreation
           display={true}
@@ -533,7 +532,6 @@ const StixCoreRelationshipCreationFromControlledDial: FunctionComponent<StixCore
   defaultStopTime,
   controlledDial,
 }) => {
-  const { t_i18n } = useFormatter();
   const [step, setStep] = useState<number>(0);
   const [targetEntities, setTargetEntities] = useState<TargetEntity[]>([]);
 
@@ -547,10 +545,7 @@ const StixCoreRelationshipCreationFromControlledDial: FunctionComponent<StixCore
       title={''} // Defined in custom header prop
       controlledDial={controlledDial ?? CreateRelationshipControlledDial}
       onClose={reset}
-      header={<Header
-        showCreates={step === 0}
-        t={t_i18n}
-              />}
+      header={<Header showCreates={step === 0} />}
     >
       <QueryRenderer
         query={stixCoreRelationshipCreationFromEntityQuery}
