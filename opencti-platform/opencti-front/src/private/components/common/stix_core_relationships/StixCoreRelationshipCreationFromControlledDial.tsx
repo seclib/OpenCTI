@@ -33,14 +33,14 @@ import {
 import { StixCoreRelationshipCreationFromEntityQuery$data } from './__generated__/StixCoreRelationshipCreationFromEntityQuery.graphql';
 import Drawer from '../drawer/Drawer';
 
-const ViewContainer = styled('div')({ minHeight: '100%' });
+export const ViewContainer = styled('div')({ minHeight: '100%' });
 
-const SelectEntityContainer = styled('div')({
+export const SelectEntityContainer = styled('div')({
   height: '100%',
   width: '100%',
 });
 
-const ContinueButton = styled(Fab)({
+export const ContinueButton = styled(Fab)({
   position: 'fixed',
   bottom: 40,
   right: 30,
@@ -53,7 +53,7 @@ const StyledButton = styled(Button)<{ marginRight?: string }>(({ marginRight }) 
   fontSize: 'small',
 }));
 
-const CreateRelationshipControlledDial = ({ onOpen }: {
+export const CreateRelationshipControlledDial = ({ onOpen }: {
   onOpen: () => void
 }) => {
   const { t_i18n } = useFormatter();
@@ -75,7 +75,7 @@ interface HeaderProps {
 }
 
 // Custom header prop for entity/observable creation buttons in initial step
-const Header: FunctionComponent<HeaderProps> = ({
+export const Header: FunctionComponent<HeaderProps> = ({
   showCreates,
   t,
 }) => {
@@ -177,19 +177,23 @@ const Header: FunctionComponent<HeaderProps> = ({
   </StyledHeader>);
 };
 
-const renderLoader = () => {
+export const renderLoader = () => {
+  const FullHeightWidthDisplayTable = styled('div')({
+    display: 'table',
+    height: '100%',
+    width: '100%',
+  });
+  const CenterAlignedTableCellSpan = styled('span')({
+    display: 'table-cell',
+    verticalAlign: 'middle',
+    textAlign: 'center',
+  });
   return (
-    <div style={{ display: 'table', height: '100%', width: '100%' }}>
-      <span
-        style={{
-          display: 'table-cell',
-          verticalAlign: 'middle',
-          textAlign: 'center',
-        }}
-      >
+    <FullHeightWidthDisplayTable>
+      <CenterAlignedTableCellSpan>
         <CircularProgress size={80} thickness={2}/>
-      </span>
-    </div>
+      </CenterAlignedTableCellSpan>
+    </FullHeightWidthDisplayTable>
   );
 };
 
@@ -348,6 +352,17 @@ const SelectEntity = ({
   );
 };
 
+/**
+ * The second page of the create relationship drawer: filling out the relationship
+ * @param props.sourceEntity The source entity
+ * @param props.targetEntities The target entities
+ * @param props.handleClose Function called on close
+ * @param props.allowedRelationshipTypes The relationship types available to be selected
+ * @param props.isReversable Whether this relationship can be reversed
+ * @param props.defaultStartTime The default start time
+ * @param props.defaultStopTime The default stop time
+ * @returns JSX.Element
+ */
 const RenderForm = ({
   sourceEntity,
   targetEntities,

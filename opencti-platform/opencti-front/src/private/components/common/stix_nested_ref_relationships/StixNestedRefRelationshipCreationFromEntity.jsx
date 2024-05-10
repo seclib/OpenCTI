@@ -167,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const stixNestedRefRelationshipResolveTypes = graphql`
+export const stixNestedRefRelationshipResolveTypes = graphql`
   query StixNestedRefRelationshipCreationFromEntityResolveQuery($id: String!, $toType: String!) {
     stixSchemaRefRelationships(id: $id, toType: $toType) {
       entity {

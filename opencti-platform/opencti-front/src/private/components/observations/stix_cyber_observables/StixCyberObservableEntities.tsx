@@ -13,24 +13,24 @@ import StixCyberObservableEntitiesLines, { stixCyberObservableEntitiesLinesQuery
 import { StixCyberObservableEntitiesLinesPaginationQuery$data } from './__generated__/StixCyberObservableEntitiesLinesPaginationQuery.graphql';
 import { useFormatter } from '../../../../components/i18n';
 
-const FullHeightContainer = styled('div')({
+export const FullHeightContainer = styled('div')({
   height: '100%',
 });
 
-const StyledLabel = styled(Typography)({
+export const StyledLabel = styled(Typography)({
   float: 'left',
 });
 
-const PlaceholderSecurity = styled('div')({
+export const PlaceholderSecurity = styled('div')({
   height: 29,
 });
 
-const StyledSearchContainer = styled('div')({
+export const StyledSearchContainer = styled('div')({
   float: 'right',
   marginTop: -10,
 });
 
-const StyledList = styled(List)({
+export const StyledList = styled(List)({
   height: '100%',
   minHeight: '100%',
   margin: 0,
@@ -39,17 +39,17 @@ const StyledList = styled(List)({
   marginTop: -10,
 });
 
-const StyledListItem = styled(ListItem)({
+export const StyledListItem = styled(ListItem)({
   paddingTop: 0,
 });
 
-const StyledListItemIcon = styled(ListItemIcon)({
+export const StyledListItemIcon = styled(ListItemIcon)({
   padding: '0 8px 0 8px',
   fontWeight: 700,
   fontSize: 12,
 });
 
-const InLineControlledDial = ({ onOpen }: { onOpen: () => void }) => {
+export const InLineControlledDial = ({ onOpen }: { onOpen: () => void }) => {
   const { t_i18n } = useFormatter();
 
   const StyledIconButton = styled(IconButton)({
@@ -67,7 +67,7 @@ const InLineControlledDial = ({ onOpen }: { onOpen: () => void }) => {
   </StyledIconButton>;
 };
 
-const StyledInlineHeader = styled('div')<{ width: string, isSortable: boolean }>(({
+export const StyledInlineHeader = styled('div')<{ width: string, isSortable: boolean }>(({
   width,
   isSortable,
 }) => ({
