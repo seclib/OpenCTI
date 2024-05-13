@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useContext, useRef, useState } from 'react';
-import { v4 as uuid } from 'uuid';
 import { useFormatter } from 'src/components/i18n';
 import { QueryRenderer, commitMutation, handleErrorInForm } from 'src/relay/environment';
 import ListLines from 'src/components/list_lines/ListLines';
@@ -7,9 +6,11 @@ import { emptyFilterGroup, removeIdFromFilterGroupObject } from 'src/utils/filte
 import useFiltersState from 'src/utils/filters/useFiltersState';
 import useEntityToggle from 'src/utils/hooks/useEntityToggle';
 import { ChevronRightOutlined } from '@mui/icons-material';
-import { ConnectionHandler, RecordSourceSelectorProxy } from 'relay-runtime';
+import { ConnectionHandler, RecordSourceSelectorProxy, graphql } from 'relay-runtime';
 import { FormikConfig } from 'formik';
 import { formatDate } from 'src/utils/Time';
+import { useLazyLoadQuery } from 'react-relay';
+import { styled } from '@mui/material';
 import { TargetEntity } from '../stix_core_relationships/StixCoreRelationshipCreationFromEntity';
 import Drawer from '../drawer/Drawer';
 import {
@@ -26,6 +27,15 @@ import { CreateRelationshipContext } from '../menus/CreateRelationshipContextPro
 import StixNestedRefRelationshipCreationFromEntityLines, { stixNestedRefRelationshipCreationFromEntityLinesQuery } from './StixNestedRefRelationshipCreationFromEntityLines';
 import { StixNestedRefRelationshipCreationFromEntityLinesQuery$data } from './__generated__/StixNestedRefRelationshipCreationFromEntityLinesQuery.graphql';
 import StixNestedRefRelationshipCreationForm, { StixNestedRefRelationshipCreationFormValues } from './StixNestedRefRelationshipCreationForm';
+import { StixNestedRefRelationshipCreationFromEntityFablessTargetTypesQuery } from './__generated__/StixNestedRefRelationshipCreationFromEntityFablessTargetTypesQuery.graphql';
+
+const supportedTargetEntityTypes = graphql`
+  query StixNestedRefRelationshipCreationFromEntityFablessTargetTypesQuery(
+    $id: String!
+  ) {
+    stixNestedRefRelationshipFromEntityType(id: $id)
+  }
+`;
 
 /**
  * The first page of the create relationship drawer: selecting the entity/entites
@@ -33,6 +43,7 @@ import StixNestedRefRelationshipCreationForm, { StixNestedRefRelationshipCreatio
  * @param props.entityType The source entity's type
  * @param props.setTargetEntities Dispatch to set relationship target entities
  * @param props.handleNextStep Function to continue on to the next step
+ * @param props.stixNestedRefTypes List of valid target entity types
  * @returns JSX.Element
  */
 const SelectEntity = ({
@@ -40,28 +51,16 @@ const SelectEntity = ({
   entityType,
   setTargetEntities,
   handleNextStep,
+  stixNestedRefTypes,
 }: {
   id: string,
   entityType: string,
   setTargetEntities: React.Dispatch<TargetEntity[]>,
   handleNextStep: () => void,
+  stixNestedRefTypes: string[],
 }) => {
   const { t_i18n } = useFormatter();
-  const { state: { stixCoreObjectTypes } } = useContext(CreateRelationshipContext);
-  const typeFilters = (stixCoreObjectTypes ?? []).length > 0
-    ? {
-      mode: 'and',
-      filterGroups: [],
-      filters: [{
-        id: uuid(),
-        key: 'entity_type',
-        values: stixCoreObjectTypes ?? [],
-        operator: 'eq',
-        mode: 'or',
-      }],
-    }
-    : emptyFilterGroup;
-  const [filters, helpers] = useFiltersState(typeFilters, typeFilters);
+  const [filters, helpers] = useFiltersState(emptyFilterGroup, emptyFilterGroup);
   const [sortBy, setSortBy] = useState<string>('_score');
   const [orderAsc, setOrderAsc] = useState<boolean>(false);
   const [numberOfElements, setNumberOfElements] = useState({
@@ -93,7 +92,7 @@ const SelectEntity = ({
     filters: removeIdFromFilterGroupObject(filters),
     orderBy: sortBy,
     orderMode: orderAsc ? 'asc' : 'desc',
-    types: stixCoreObjectTypes,
+    types: stixNestedRefTypes,
   };
   const handleSort = (field: string, sortOrderAsc: boolean) => {
     setSortBy(field);
@@ -126,6 +125,11 @@ const SelectEntity = ({
       isSortable: false,
     },
   };
+  const NoTargetEntities = styled('div')({
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+  });
   return (
     <SelectEntityContainer>
       <ListLines
@@ -156,29 +160,34 @@ const SelectEntity = ({
           'creator_id',
         ]}
       >
-        <QueryRenderer
-          query={stixNestedRefRelationshipCreationFromEntityLinesQuery}
-          variables={{ count: 100, ...searchPaginationOptions }}
-          render={({ props }: { props: StixNestedRefRelationshipCreationFromEntityLinesQuery$data }) => {
-            if (props) {
-              return (
-                <StixNestedRefRelationshipCreationFromEntityLines
-                  entityType={entityType}
-                  data={props}
-                  paginationOptions={searchPaginationOptions}
-                  dataColumns={dataColumns}
-                  initialLoading={false}
-                  setNumberOfElements={setNumberOfElements}
-                  onToggleEntity={onInstanceToggleEntity}
-                  containerRef={containerRef}
-                  selectedElements={selectedElements}
-                  deSelectedElements={deSelectedElements}
-                  selectAll={false}
-                />
-              );
-            } return (<></>);
-          }}
-        />
+        {stixNestedRefTypes.length > 0
+          ? <QueryRenderer
+              query={stixNestedRefRelationshipCreationFromEntityLinesQuery}
+              variables={{ count: 100, ...searchPaginationOptions }}
+              render={({ props }: { props: StixNestedRefRelationshipCreationFromEntityLinesQuery$data }) => {
+                if (props) {
+                  return (
+                    <StixNestedRefRelationshipCreationFromEntityLines
+                      entityType={entityType}
+                      data={props}
+                      paginationOptions={searchPaginationOptions}
+                      dataColumns={dataColumns}
+                      initialLoading={false}
+                      setNumberOfElements={setNumberOfElements}
+                      onToggleEntity={onInstanceToggleEntity}
+                      containerRef={containerRef}
+                      selectedElements={selectedElements}
+                      deSelectedElements={deSelectedElements}
+                      selectAll={false}
+                    />
+                  );
+                } return (<></>);
+              }}
+            />
+          : <NoTargetEntities>
+            <em>{t_i18n('No valid target entities')}</em>
+          </NoTargetEntities>
+        }
       </ListLines>
       <ContinueButton
         variant="extended"
@@ -353,6 +362,9 @@ StixNestedRefRelationshipCreationFromEntityFablessProps
   const [step, setStep] = useState<number>(0);
   const [targetEntities, setTargetEntities] = useState<TargetEntity[]>([]);
 
+  const { stixNestedRefRelationshipFromEntityType } = useLazyLoadQuery<StixNestedRefRelationshipCreationFromEntityFablessTargetTypesQuery>(supportedTargetEntityTypes, { id });
+  const stixNestedRefTypes: string[] = [...(stixNestedRefRelationshipFromEntityType ?? [])] as string[];
+
   const reset = () => {
     setStep(0);
     setTargetEntities([]);
@@ -372,6 +384,7 @@ StixNestedRefRelationshipCreationFromEntityFablessProps
             entityType={entityType}
             setTargetEntities={setTargetEntities}
             handleNextStep={() => setStep(1)}
+            stixNestedRefTypes={stixNestedRefTypes}
           />
         )}
         {step === 1 && (

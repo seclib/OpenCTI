@@ -84,7 +84,7 @@ const StixCyberObservableNestedEntities: FunctionComponent<StixCyberObservableNe
 
   return (<FullHeightContainer>
     <StyledLabel variant="h4" gutterBottom={true}>
-      {t_i18n('Nested Objects')}
+      {t_i18n('Nested objects')}
     </StyledLabel>
     <Security
       needs={[KNOWLEDGE_KNUPDATE]}
@@ -94,7 +94,7 @@ const StixCyberObservableNestedEntities: FunctionComponent<StixCyberObservableNe
         ? <StixNestedRefRelationshipCreationFromEntityFabless
             id={entityId}
             entityType={entityType}
-            isReversable={true}
+            isReversable={false}
             controlledDial={InLineControlledDial}
           />
         : <StixNestedRefRelationshipCreationFromEntity
