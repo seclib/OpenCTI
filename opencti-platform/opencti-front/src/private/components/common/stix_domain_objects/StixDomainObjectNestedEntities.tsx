@@ -56,7 +56,7 @@ StixDomainObjectNestedEntitiesProps
           ? <StixNestedRefRelationshipCreationFromEntityFabless
               id={entityId}
               entityType={entityType}
-              isReversable={true}
+              isReversable={false}
               controlledDial={InLineControlledDial}
             />
           : <StixNestedRefRelationshipCreationFromEntity

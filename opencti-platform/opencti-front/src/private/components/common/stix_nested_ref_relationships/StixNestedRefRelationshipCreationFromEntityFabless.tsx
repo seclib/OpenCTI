@@ -1,12 +1,15 @@
 import React, { FunctionComponent, useContext, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { useFormatter } from 'src/components/i18n';
-import { QueryRenderer } from 'src/relay/environment';
+import { QueryRenderer, commitMutation, handleErrorInForm } from 'src/relay/environment';
 import ListLines from 'src/components/list_lines/ListLines';
 import { emptyFilterGroup, removeIdFromFilterGroupObject } from 'src/utils/filters/filtersUtils';
 import useFiltersState from 'src/utils/filters/useFiltersState';
 import useEntityToggle from 'src/utils/hooks/useEntityToggle';
 import { ChevronRightOutlined } from '@mui/icons-material';
+import { ConnectionHandler, RecordSourceSelectorProxy } from 'relay-runtime';
+import { FormikConfig } from 'formik';
+import { formatDate } from 'src/utils/Time';
 import { TargetEntity } from '../stix_core_relationships/StixCoreRelationshipCreationFromEntity';
 import Drawer from '../drawer/Drawer';
 import {
@@ -17,12 +20,12 @@ import {
   ViewContainer,
   renderLoader,
 } from '../stix_core_relationships/StixCoreRelationshipCreationFromControlledDial';
-import { stixNestedRefRelationshipResolveTypes } from './StixNestedRefRelationshipCreationFromEntity';
+import { stixNestedRefRelationshipCreationFromEntityMutation, stixNestedRefRelationshipResolveTypes } from './StixNestedRefRelationshipCreationFromEntity';
 import { StixNestedRefRelationshipCreationFromEntityResolveQuery$data } from './__generated__/StixNestedRefRelationshipCreationFromEntityResolveQuery.graphql';
 import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
 import StixNestedRefRelationshipCreationFromEntityLines, { stixNestedRefRelationshipCreationFromEntityLinesQuery } from './StixNestedRefRelationshipCreationFromEntityLines';
 import { StixNestedRefRelationshipCreationFromEntityLinesQuery$data } from './__generated__/StixNestedRefRelationshipCreationFromEntityLinesQuery.graphql';
-import StixNestedRefRelationshipCreationForm from './StixNestedRefRelationshipCreationForm';
+import StixNestedRefRelationshipCreationForm, { StixNestedRefRelationshipCreationFormValues } from './StixNestedRefRelationshipCreationForm';
 
 /**
  * The first page of the create relationship drawer: selecting the entity/entites
@@ -86,10 +89,10 @@ const SelectEntity = ({
     }
   };
   const searchPaginationOptions = {
-    searchTerm,
+    search: searchTerm,
     filters: removeIdFromFilterGroupObject(filters),
-    orderBy: searchTerm.length > 0 ? null : 'created_at',
-    orderMode: searchTerm.length > 0 ? null : 'desc',
+    orderBy: sortBy,
+    orderMode: orderAsc ? 'asc' : 'desc',
     types: stixCoreObjectTypes,
   };
   const handleSort = (field: string, sortOrderAsc: boolean) => {
@@ -155,13 +158,14 @@ const SelectEntity = ({
       >
         <QueryRenderer
           query={stixNestedRefRelationshipCreationFromEntityLinesQuery}
-          variables={{ count: 25, ...searchPaginationOptions }}
+          variables={{ count: 100, ...searchPaginationOptions }}
           render={({ props }: { props: StixNestedRefRelationshipCreationFromEntityLinesQuery$data }) => {
             if (props) {
               return (
                 <StixNestedRefRelationshipCreationFromEntityLines
                   entityType={entityType}
                   data={props}
+                  paginationOptions={searchPaginationOptions}
                   dataColumns={dataColumns}
                   initialLoading={false}
                   setNumberOfElements={setNumberOfElements}
@@ -219,9 +223,8 @@ const RenderForm = ({
   if (data?.stixSchemaRefRelationships === null || data?.stixSchemaRefRelationships === undefined) return <></>;
   const { state: {
     reversed: initiallyReversed,
-    // onCreate,
-    // connectionKey,
-    // paginationOptions,
+    onCreate,
+    paginationOptions,
   } } = useContext(CreateRelationshipContext);
   const [reversed, setReversed] = useState<boolean>(initiallyReversed ?? false);
 
@@ -248,6 +251,71 @@ const RenderForm = ({
   const startTime = defaultStartTime ?? (new Date()).toISOString();
   const stopTime = defaultStopTime ?? (new Date()).toISOString();
 
+  const commit = (finalValues: object) => {
+    return new Promise((resolve, reject) => {
+      commitMutation({
+        mutation: stixNestedRefRelationshipCreationFromEntityMutation,
+        variables: { input: finalValues },
+        updater: (store: RecordSourceSelectorProxy) => {
+          if (typeof onCreate !== 'function') {
+            const payload = store.getRootField('stixRefRelationshipAdd');
+            const container = store.getRoot();
+            const userProxy = store.get(container.getDataID());
+            if (userProxy != null && payload != null && paginationOptions != null) {
+              const newEdge = payload.setLinkedRecord(payload, 'node');
+              const conn = ConnectionHandler.getConnection(
+                userProxy,
+                'Pagination_stixNestedRefRelationships',
+                paginationOptions,
+              );
+              if (conn != null) {
+                ConnectionHandler.insertEdgeBefore(conn, newEdge);
+              }
+            }
+          }
+        },
+        optimisticUpdater: undefined,
+        setSubmitting: undefined,
+        optimisticResponse: undefined,
+        onError: (error: Error) => {
+          reject(error);
+        },
+        onCompleted: (response: Response) => {
+          resolve(response);
+        },
+      });
+    });
+  };
+
+  const onSubmit: FormikConfig<StixNestedRefRelationshipCreationFormValues>['onSubmit'] = async (values, { setSubmitting, setErrors, resetForm }) => {
+    setSubmitting(true);
+    for (const targetEntity of targetEntities) {
+      const fromEntityId = reversed ? targetEntity.id : sourceEntity.id;
+      const toEntityId = reversed ? sourceEntity.id : targetEntity.id;
+      const finalValues = {
+        fromId: fromEntityId,
+        toId: toEntityId,
+        relationship_type: values.relationship_type,
+        start_time: formatDate(values.start_time),
+        stop_time: formatDate(values.stop_time),
+      };
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await commit(finalValues);
+      } catch (error) {
+        setSubmitting(false);
+        return handleErrorInForm(error, setErrors);
+      }
+    }
+    setSubmitting(false);
+    resetForm();
+    handleClose();
+    if (typeof onCreate === 'function') {
+      onCreate();
+    }
+    return true;
+  };
+
   return (
     <StixNestedRefRelationshipCreationForm
       sourceEntity={fromEntities[0]}
@@ -255,7 +323,7 @@ const RenderForm = ({
       relationshipTypes={relationshipTypes}
       defaultStartTime={startTime}
       defaultStopTime={stopTime}
-      onSubmit={() => {}} // TODO: Write onSubmit function
+      onSubmit={onSubmit}
       handleClose={handleClose}
       handleBack={handleBack}
       handleReverse={isReversable ? handleReverse : undefined}

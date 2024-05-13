@@ -278,7 +278,7 @@ export const stixNestedRefRelationshipResolveTypes = graphql`
   }
 `;
 
-const stixNestedRefRelationshipCreationFromEntityMutation = graphql`
+export const stixNestedRefRelationshipCreationFromEntityMutation = graphql`
   mutation StixNestedRefRelationshipCreationFromEntityMutation(
     $input: StixRefRelationshipAddInput!
   ) {

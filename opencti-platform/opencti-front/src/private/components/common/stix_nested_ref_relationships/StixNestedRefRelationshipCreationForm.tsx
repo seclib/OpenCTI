@@ -125,7 +125,7 @@ const StyledArrow = styled(ArrowRightAlt)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-interface Values {
+export interface StixNestedRefRelationshipCreationFormValues {
   from_id: string,
   to_ids: string[],
   relationship_type: string,
@@ -139,7 +139,7 @@ interface StixNestedRefRelationshipCreationFormProps {
   relationshipTypes: string[],
   defaultStartTime?: string,
   defaultStopTime?: string,
-  onSubmit: (values: Values, helpers: FormikHelpers<Values>) => void,
+  onSubmit: (values: StixNestedRefRelationshipCreationFormValues, helpers: FormikHelpers<StixNestedRefRelationshipCreationFormValues>) => void,
   handleClose: () => void,
   handleBack: () => void,
   handleReverse?: () => void,
@@ -171,7 +171,7 @@ StixNestedRefRelationshipCreationFormProps
       .required(t_i18n('This field is required')),
   });
 
-  const initialValues: Values = {
+  const initialValues: StixNestedRefRelationshipCreationFormValues = {
     from_id: sourceEntity.id,
     to_ids: targetEntities.map((target) => target.id),
     relationship_type: relationshipTypes?.[0] ?? undefined,
