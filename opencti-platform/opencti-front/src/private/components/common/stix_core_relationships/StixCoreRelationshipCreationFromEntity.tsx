@@ -712,12 +712,12 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
             || allowedRelationshipTypes.length === 0
             || allowedRelationshipTypes.includes('stix-core-relationship')
             || allowedRelationshipTypes.includes(n),
-              resolveRelationsTypes(
-                fromEntities[0].entity_type,
-                toEntities[0].entity_type,
-                schema?.schemaRelationsTypesMapping ?? new Map(),
-              ),
-            ));
+            resolveRelationsTypes(
+              fromEntities[0].entity_type,
+              toEntities[0].entity_type,
+              schema?.schemaRelationsTypesMapping ?? new Map(),
+            ),
+          ));
           return (
             <>
               <div className={classes.header}>

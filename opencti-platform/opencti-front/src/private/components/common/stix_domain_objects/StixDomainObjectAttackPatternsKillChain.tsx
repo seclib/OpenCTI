@@ -18,7 +18,6 @@ import StixDomainObjectAttackPatternsKillChainLines from './StixDomainObjectAtta
 import StixDomainObjectAttackPatternsKillChainMatrix from './StixDomainObjectAttackPatternsKillChainMatrix';
 import Filters from '../lists/Filters';
 import {
-  StixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery$data,
   StixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery$variables,
   StixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery as TriggerQuery,
 } from './__generated__/StixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery.graphql';
@@ -27,6 +26,7 @@ import {
   StixDomainObjectAttackPatternsKillChain_triggers$data,
 } from './__generated__/StixDomainObjectAttackPatternsKillChain_triggers.graphql';
 import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
+import StixCoreObjectsExports from '../stix_core_objects/StixCoreObjectsExports';
 
 const StyledParameters = styled('div')({
   marginBottom: 20,
@@ -506,7 +506,7 @@ export const stixDomainObjectAttackPatternsKillChainStixCoreRelationshipsTrigger
 `;
 
 interface StixDomainObjectAttackPatternsKillChainProps {
-  triggerData: StixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery$data,
+  triggerData: FragmentKey,
   componentProps: StixDomainObjectAttackPatternsKillChainComponentProps,
 }
 
