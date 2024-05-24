@@ -583,7 +583,7 @@ class ToolBar extends Component {
     const actions = [
       {
         type: 'MERGE',
-        context: { values: filteredStixDomainObjects },
+        context: { values: filteredStixDomainObjects, options: { safeAction: true } },
       },
     ];
     this.setState({ scope, actions, mergingElement: keptElement }, () => {
