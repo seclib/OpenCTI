@@ -129,7 +129,7 @@ const CaseIncidents: FunctionComponent<CaseIncidentsProps> = () => {
       },
     };
 
-    return (
+    return (<div data-testid="incident-page">
       <ListLines
         helpers={helpers}
         sortBy={sortBy}
@@ -192,7 +192,7 @@ const CaseIncidents: FunctionComponent<CaseIncidentsProps> = () => {
           </React.Suspense>
         )}
       </ListLines>
-    );
+    </div>);
   };
   return (
     <ExportContextProvider>

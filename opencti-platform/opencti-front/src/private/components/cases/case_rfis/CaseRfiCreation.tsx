@@ -9,7 +9,6 @@ import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import { handleErrorInForm } from 'src/relay/environment';
-import useHelper from 'src/utils/hooks/useHelper';
 import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import DateTimePickerField from '../../../../components/DateTimePickerField';
 import { useFormatter } from '../../../../components/i18n';
