@@ -6,7 +6,7 @@ import { Add, ChevronRightOutlined } from '@mui/icons-material';
 import { QueryRenderer, commitMutation, handleErrorInForm } from 'src/relay/environment';
 import { UserContext } from 'src/utils/hooks/useAuth';
 import ListLines from 'src/components/list_lines/ListLines';
-import { FilterGroup, emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from 'src/utils/filters/filtersUtils';
+import { emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from 'src/utils/filters/filtersUtils';
 import useFiltersState from 'src/utils/filters/useFiltersState';
 import useEntityToggle from 'src/utils/hooks/useEntityToggle';
 import { resolveRelationsTypes } from 'src/utils/Relation';
@@ -32,6 +32,7 @@ import {
 } from './StixCoreRelationshipCreationFromEntity';
 import { StixCoreRelationshipCreationFromEntityQuery$data } from './__generated__/StixCoreRelationshipCreationFromEntityQuery.graphql';
 import Drawer from '../drawer/Drawer';
+import { FilterGroup } from '../../../../utils/filters/filtersHelpers-types';
 
 export const ViewContainer = styled('div')({ minHeight: '100%' });
 

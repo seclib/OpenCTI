@@ -5,7 +5,6 @@ import SearchInput from 'src/components/SearchInput';
 import { useFormatter } from 'src/components/i18n';
 import useHelper from 'src/utils/hooks/useHelper';
 import { HandleAddFilter } from 'src/utils/hooks/useLocalStorage';
-import { Filter, FilterGroup } from 'src/utils/filters/filtersUtils';
 import FilterIconButton from 'src/components/FilterIconButton';
 import { ProgressWrench } from 'mdi-material-ui';
 import { export_max_size } from 'src/utils/utils';
@@ -27,6 +26,7 @@ import {
 } from './__generated__/StixDomainObjectAttackPatternsKillChain_triggers.graphql';
 import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
 import StixCoreObjectsExports from '../stix_core_objects/StixCoreObjectsExports';
+import { Filter, FilterGroup } from '../../../../utils/filters/filtersHelpers-types';
 
 const StyledParameters = styled('div')({
   marginBottom: 20,
