@@ -22,6 +22,8 @@ import ErrorNotFound from '../../../../components/ErrorNotFound';
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootAttackPatternSubscription($id: ID!) {
@@ -89,7 +91,7 @@ class RootAttackPattern extends Component {
 
     const link = `/dashboard/techniques/attack_patterns/${attackPatternId}/knowledge`;
     return (
-      <div>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route
             path="/knowledge/*"
@@ -133,6 +135,7 @@ class RootAttackPattern extends Component {
                       disableSharing={true}
                       stixDomainObject={props.attackPattern}
                       PopoverComponent={<AttackPatternPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                     />
                     <Box
                       sx={{
@@ -241,7 +244,7 @@ class RootAttackPattern extends Component {
             return <Loader />;
           }}
         />
-      </div>
+      </CreateRelationshipContextProvider>
     );
   }
 }

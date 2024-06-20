@@ -24,6 +24,7 @@ import MenuItem from '@mui/material/MenuItem';
 import * as R from 'ramda';
 import * as Yup from 'yup';
 import makeStyles from '@mui/styles/makeStyles';
+import useHelper from '../../../../utils/hooks/useHelper';
 import { stixCoreObjectQuickSubscriptionContentQuery } from '../stix_core_objects/stixCoreObjectTriggersUtils';
 import StixCoreObjectAskAI from '../stix_core_objects/StixCoreObjectAskAI';
 import StixCoreObjectSubscribers from '../stix_core_objects/StixCoreObjectSubscribers';
@@ -183,10 +184,13 @@ const aliasValidation = (t) => Yup.object().shape({
 const StixDomainObjectHeader = (props) => {
   const classes = useStyles();
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const {
     stixDomainObject,
     isOpenctiAlias,
     PopoverComponent,
+    RelateComponent,
     viewAs,
     onViewAs,
     disablePopover,
@@ -546,6 +550,11 @@ const StixDomainObjectHeader = (props) => {
               })
             )}
           </div>
+          )}
+          {FABReplaced && RelateComponent && (
+            <RelateComponent
+              id={stixDomainObject.id}
+            />
           )}
         </div>
       </div>

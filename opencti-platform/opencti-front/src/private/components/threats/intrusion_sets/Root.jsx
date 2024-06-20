@@ -23,6 +23,8 @@ import StixCoreObjectKnowledgeBar from '../../common/stix_core_objects/StixCoreO
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootIntrusionSetSubscription($id: ID!) {
@@ -95,7 +97,7 @@ class RootIntrusionSet extends Component {
 
     const link = `/dashboard/threats/intrusion_sets/${intrusionSetId}/knowledge`;
     return (
-      <>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route
             path="/knowledge/*"
@@ -143,6 +145,7 @@ class RootIntrusionSet extends Component {
                       entityType="Intrusion-Set"
                       stixDomainObject={intrusionSet}
                       PopoverComponent={<IntrusionSetPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                       enableAskAi={true}
                     />
@@ -258,7 +261,7 @@ class RootIntrusionSet extends Component {
             return <Loader />;
           }}
         />
-      </>
+      </CreateRelationshipContextProvider>
     );
   }
 }

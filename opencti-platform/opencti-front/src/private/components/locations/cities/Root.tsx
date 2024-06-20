@@ -26,6 +26,8 @@ import { useFormatter } from '../../../../components/i18n';
 import CityPopover from './CityPopover';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
 
 const subscription = graphql`
   subscription RootCitiesSubscription($id: ID!) {
@@ -81,7 +83,7 @@ const RootCityComponent = ({ queryRef, cityId, link }) => {
   const { city, connectorsForImport, connectorsForExport } = data;
   const paddingRight = getPaddingRight(location.pathname, city.id, '/dashboard/locations/cities');
   return (
-    <>
+    <CreateRelationshipContextProvider>
       {city ? (
         <div style={{ paddingRight }}>
           <Breadcrumbs variant="object" elements={[
@@ -95,6 +97,7 @@ const RootCityComponent = ({ queryRef, cityId, link }) => {
             disableSharing={true}
             stixDomainObject={city}
             PopoverComponent={<CityPopover id={city.id} />}
+            RelateComponent={CreateRelationshipButtonComponent}
             enableQuickSubscription={true}
             isOpenctiAlias={true}
           />
@@ -214,7 +217,7 @@ const RootCityComponent = ({ queryRef, cityId, link }) => {
       ) : (
         <ErrorNotFound />
       )}
-    </>
+    </CreateRelationshipContextProvider>
   );
 };
 

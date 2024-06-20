@@ -1,21 +1,20 @@
-import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import React, { useContext, useEffect } from 'react';
+import { useLazyLoadQuery } from 'react-relay';
+import { styled } from '@mui/material';
 import Loader from '../../../../components/Loader';
-import { QueryRenderer } from '../../../../relay/environment';
 import StixDomainObjectAttackPatternsKillChain, { stixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery } from './StixDomainObjectAttackPatternsKillChain';
 import { usePaginationLocalStorage } from '../../../../utils/hooks/useLocalStorage';
 import { emptyFilterGroup, isFilterGroupNotEmpty, useRemoveIdAndIncorrectKeysFromFilterGroupObject } from '../../../../utils/filters/filtersUtils';
+import { CreateRelationshipContext } from '../menus/CreateRelationshipContextProvider';
 
-// Deprecated - https://mui.com/system/styles/basics/
-// Do not use it for new code.
-const useStyles = makeStyles(() => ({
+const StyledContainer = styled('div')({
   container: {
     width: '100%',
     height: '100%',
     margin: 0,
     padding: 0,
   },
-}));
+});
 
 const StixDomainObjectAttackPatterns = ({
   stixDomainObjectId,
@@ -25,7 +24,6 @@ const StixDomainObjectAttackPatterns = ({
   disableExport,
 }) => {
   const LOCAL_STORAGE_KEY = `attack-patterns-${stixDomainObjectId}`;
-  const classes = useStyles();
   const {
     viewStorage,
     helpers,
@@ -36,6 +34,7 @@ const StixDomainObjectAttackPatterns = ({
     filters: emptyFilterGroup,
     view: 'matrix',
   });
+  const { setState: setCreateRelationshipContext } = useContext(CreateRelationshipContext);
   const { searchTerm, filters, view, openExports } = viewStorage;
   const userFilters = useRemoveIdAndIncorrectKeysFromFilterGroupObject(filters, ['stix-core-relationship']);
   const contextFilters = {
@@ -47,40 +46,43 @@ const StixDomainObjectAttackPatterns = ({
     filterGroups: userFilters && isFilterGroupNotEmpty(userFilters) ? [userFilters] : [],
   };
   const queryPaginationOptions = { ...paginationOptions, filters: contextFilters };
+  useEffect(() => {
+    setCreateRelationshipContext({
+      stixCoreObjectTypes: ['Attack-Pattern'],
+      paginationOptions: queryPaginationOptions,
+    });
+  }, []);
+  const triggerData = useLazyLoadQuery(
+    stixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery,
+    { first: 500, ...queryPaginationOptions },
+  );
   return (
-    <div className={classes.container}>
-      <QueryRenderer
-        query={stixDomainObjectAttackPatternsKillChainStixCoreRelationshipsQuery}
-        variables={{ first: 500, ...queryPaginationOptions }}
-        render={({ props }) => {
-          if (props) {
-            return (
-              <StixDomainObjectAttackPatternsKillChain
-                data={props}
-                entityLink={entityLink}
-                paginationOptions={queryPaginationOptions}
-                stixDomainObjectId={stixDomainObjectId}
-                handleChangeView={helpers.handleChangeView}
-                handleSearch={helpers.handleSearch}
-                handleAddFilter={helpers.handleAddFilter}
-                handleRemoveFilter={helpers.handleRemoveFilter}
-                handleSwitchGlobalMode={helpers.handleSwitchGlobalMode}
-                handleSwitchLocalMode={helpers.handleSwitchLocalMode}
-                filters={filters}
-                searchTerm={searchTerm ?? ''}
-                currentView={view}
-                defaultStartTime={defaultStartTime}
-                defaultStopTime={defaultStopTime}
-                exportContext={{ entity_type: 'stix-core-relationship' }}
-                handleToggleExports={disableExport ? null : helpers.handleToggleExports}
-                openExports={openExports}
-              />
-            );
-          }
-          return <Loader withRightPadding={true} />;
-        }}
-      />
-    </div>
+    <React.Suspense fallback={<Loader withRightPadding={true} />}>
+      <StyledContainer>
+        <StixDomainObjectAttackPatternsKillChain
+          triggerData={triggerData}
+          componentProps={{
+            stixDomainObjectId,
+            entityLink,
+            handleSearch: helpers.handleSearch,
+            handleAddFilter: helpers.handleAddFilter,
+            handleRemoveFilter: helpers.handleRemoveFilter,
+            handleSwitchLocalMode: helpers.handleSwitchLocalMode,
+            handleSwitchGlobalMode: helpers.handleSwitchGlobalMode,
+            handleChangeView: helpers.handleChangeView,
+            filters,
+            searchTerm: searchTerm ?? '',
+            currentView: view,
+            paginationOptions: queryPaginationOptions,
+            defaultStartTime,
+            defaultStopTime,
+            openExports,
+            handleToggleExports: disableExport ? null : helpers.handleToggleExports,
+            exportContext: { entity_type: 'stix-core-relationship' },
+          }}
+        />
+      </StyledContainer>
+    </React.Suspense>
   );
 };
 

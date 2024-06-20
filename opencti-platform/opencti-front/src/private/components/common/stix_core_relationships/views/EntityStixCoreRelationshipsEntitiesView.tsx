@@ -1,4 +1,6 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext, useEffect } from 'react';
+import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
+import useHelper from 'src/utils/hooks/useHelper';
 import useAuth from '../../../../../utils/hooks/useAuth';
 import ListLines from '../../../../../components/list_lines/ListLines';
 import ToolBar from '../../../data/ToolBar';
@@ -65,6 +67,7 @@ EntityStixCoreRelationshipsEntitiesViewProps
   const { platformModuleHelpers } = useAuth();
   const isRuntimeSort = platformModuleHelpers.isRuntimeFieldEnable();
   const isObservables = isStixCyberObservables(stixCoreObjectTypes);
+  const isObservableSortable = isObservables ? isRuntimeSort : true;
   const dataColumns: DataColumns = {
     entity_type: {
       label: 'Type',
@@ -77,9 +80,7 @@ EntityStixCoreRelationshipsEntitiesViewProps
       // eslint-disable-next-line no-nested-ternary
       isSortable: isStixCoreObjects(stixCoreObjectTypes)
         ? false
-        : isObservables
-          ? isRuntimeSort
-          : true,
+        : isObservableSortable,
     },
     createdBy: {
       label: 'Author',
@@ -137,6 +138,18 @@ EntityStixCoreRelationshipsEntitiesViewProps
   } = useEntityToggle(localStorageKey);
 
   const finalView = currentView || view;
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+  const { setState: setCreateRelationshipContext } = useContext(CreateRelationshipContext);
+  useEffect(() => {
+    setCreateRelationshipContext({
+      relationshipTypes,
+      stixCoreObjectTypes,
+      connectionKey: 'Pagination_stixCoreObjects',
+      reversed: isRelationReversed,
+      paginationOptions,
+    });
+  }, []);
   return (
     <>
       <ListLines
@@ -224,24 +237,26 @@ EntityStixCoreRelationshipsEntitiesViewProps
           'Be careful, you are about to delete the selected entities (not the relationships)',
         )}
       />
-      <Security needs={[KNOWLEDGE_KNUPDATE]}>
-        <StixCoreRelationshipCreationFromEntity
-          entityId={entityId}
-          allowedRelationshipTypes={relationshipTypes}
-          isRelationReversed={isRelationReversed}
-          targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(
-            stixCoreObjectTypes,
-          )}
-          targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(
-            stixCoreObjectTypes,
-          )}
-          defaultStartTime={defaultStartTime}
-          defaultStopTime={defaultStopTime}
-          paginationOptions={paginationOptions}
-          connectionKey="Pagination_stixCoreObjects"
-          paddingRight={paddingRightButtonAdd ?? 220}
-        />
-      </Security>
+      {!FABReplaced
+        && <Security needs={[KNOWLEDGE_KNUPDATE]}>
+          <StixCoreRelationshipCreationFromEntity
+            entityId={entityId}
+            allowedRelationshipTypes={relationshipTypes}
+            isRelationReversed={isRelationReversed}
+            targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(
+              stixCoreObjectTypes,
+            )}
+            targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(
+              stixCoreObjectTypes,
+            )}
+            defaultStartTime={defaultStartTime}
+            defaultStopTime={defaultStopTime}
+            paginationOptions={paginationOptions}
+            connectionKey="Pagination_stixCoreObjects"
+            paddingRight={paddingRightButtonAdd ?? 220}
+          />
+          </Security>
+      }
     </>
   );
 };

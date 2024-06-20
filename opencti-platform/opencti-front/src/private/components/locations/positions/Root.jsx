@@ -23,6 +23,8 @@ import EntityStixSightingRelationships from '../../events/stix_sighting_relation
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
 
 const subscription = graphql`
   subscription RootPositionsSubscription($id: ID!) {
@@ -88,7 +90,7 @@ class RootPosition extends Component {
     const link = `/dashboard/locations/positions/${positionId}/knowledge`;
 
     return (
-      <>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route
             path="/knowledge/*"
@@ -135,6 +137,7 @@ class RootPosition extends Component {
                       disableSharing={true}
                       stixDomainObject={props.position}
                       PopoverComponent={<PositionPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                       isOpenctiAlias={true}
                     />
@@ -262,7 +265,7 @@ class RootPosition extends Component {
             return <Loader />;
           }}
         />
-      </>
+      </CreateRelationshipContextProvider>
     );
   }
 }

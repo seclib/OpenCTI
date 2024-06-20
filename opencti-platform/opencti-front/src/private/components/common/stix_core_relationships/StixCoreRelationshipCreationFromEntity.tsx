@@ -20,6 +20,7 @@ import {
 } from '@components/common/stix_core_relationships/__generated__/StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery.graphql';
 import { FormikConfig } from 'formik/dist/types';
 import { Option } from '@components/common/form/ReferenceField';
+import useFiltersState from 'src/utils/filters/useFiltersState';
 import { commitMutation, handleErrorInForm, QueryRenderer } from '../../../../relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import { formatDate } from '../../../../utils/Time';
@@ -34,7 +35,6 @@ import { emptyFilterGroup, useRemoveIdAndIncorrectKeysFromFilterGroupObject } fr
 import StixCoreRelationshipCreationFromEntityStixCoreObjectsLines, {
   stixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery,
 } from './StixCoreRelationshipCreationFromEntityStixCoreObjectsLines';
-import useFiltersState from '../../../../utils/filters/useFiltersState';
 import type { Theme } from '../../../../components/Theme';
 import { ModuleHelper } from '../../../../utils/platformModulesHelper';
 import useEntityToggle from '../../../../utils/hooks/useEntityToggle';
@@ -91,7 +91,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
   },
 }));
 
-const stixCoreRelationshipCreationFromEntityQuery = graphql`
+export const stixCoreRelationshipCreationFromEntityQuery = graphql`
   query StixCoreRelationshipCreationFromEntityQuery($id: String!) {
     stixCoreObject(id: $id) {
       id
@@ -188,7 +188,7 @@ const stixCoreRelationshipCreationFromEntityQuery = graphql`
   }
 `;
 
-const stixCoreRelationshipCreationFromEntityFromMutation = graphql`
+export const stixCoreRelationshipCreationFromEntityFromMutation = graphql`
   mutation StixCoreRelationshipCreationFromEntityFromMutation(
     $input: StixCoreRelationshipAddInput!
   ) {
@@ -198,7 +198,7 @@ const stixCoreRelationshipCreationFromEntityFromMutation = graphql`
   }
 `;
 
-const stixCoreRelationshipCreationFromEntityToMutation = graphql`
+export const stixCoreRelationshipCreationFromEntityToMutation = graphql`
   mutation StixCoreRelationshipCreationFromEntityToMutation(
     $input: StixCoreRelationshipAddInput!
   ) {
@@ -224,8 +224,12 @@ interface StixCoreRelationshipCreationFromEntityProps {
   onCreate?: () => void;
   openExports?: boolean;
   handleReverseRelation?: () => void;
+  controlledDial?: (({ onOpen, onClose }: {
+    onOpen: () => void;
+    onClose: () => void;
+  }) => React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>>)
 }
-interface StixCoreRelationshipCreationFromEntityForm {
+export interface StixCoreRelationshipCreationFromEntityForm {
   confidence: string;
   start_time: string;
   stop_time: string;
@@ -234,7 +238,7 @@ interface StixCoreRelationshipCreationFromEntityForm {
   objectMarking: Option[];
   externalReferences: Option[];
 }
-interface TargetEntity {
+export interface TargetEntity {
   id: string;
   entity_type: string;
 }
@@ -255,6 +259,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     onCreate = undefined,
     openExports = false,
     handleReverseRelation = undefined,
+    controlledDial = undefined,
   } = props;
   let isOnlySDOs = false;
   let isOnlySCOs = false;
@@ -765,32 +770,41 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     );
   };
 
+  let openElement = controlledDial
+    ? controlledDial({
+      onOpen: () => setOpen(true),
+      onClose: handleClose,
+    })
+    : '';
+  if (variant === 'inLine') {
+    openElement = (
+      <IconButton
+        color="primary"
+        aria-label="Label"
+        onClick={() => setOpen(true)}
+        style={{ float: 'left', margin: '-15px 0 0 -2px' }}
+        size="large"
+      >
+        <Add fontSize="small"/>
+      </IconButton>
+    );
+  } else if (controlledDial === undefined && !openExports) {
+    openElement = (
+      <Fab
+        onClick={() => setOpen(true)}
+        color="primary"
+        aria-label="Add"
+        className={classes.createButton}
+        style={{ right: paddingRight || 30 }}
+      >
+        <Add/>
+      </Fab>
+    );
+  }
+
   return (
     <>
-      {/* eslint-disable-next-line no-nested-ternary */}
-      {variant === 'inLine' ? (
-        <IconButton
-          color="primary"
-          aria-label="Label"
-          onClick={() => setOpen(true)}
-          style={{ float: 'left', margin: '-15px 0 0 -2px' }}
-          size="large"
-        >
-          <Add fontSize="small"/>
-        </IconButton>
-      ) : !openExports ? (
-        <Fab
-          onClick={() => setOpen(true)}
-          color="primary"
-          aria-label="Add"
-          className={classes.createButton}
-          style={{ right: paddingRight || 30 }}
-        >
-          <Add/>
-        </Fab>
-      ) : (
-        ''
-      )}
+      {openElement}
       <Drawer
         open={open}
         anchor="right"

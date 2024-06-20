@@ -22,6 +22,8 @@ import ErrorNotFound from '../../../../components/ErrorNotFound';
 import inject18n from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootToolSubscription($id: ID!) {
@@ -91,7 +93,7 @@ class RootTool extends Component {
 
     const link = `/dashboard/arsenal/tools/${toolId}/knowledge`;
     return (
-      <>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route path="/knowledge/*" element={<StixCoreObjectKnowledgeBar
             stixCoreObjectLink={link}
@@ -131,6 +133,7 @@ class RootTool extends Component {
                       entityType="Tool"
                       stixDomainObject={tool}
                       PopoverComponent={<ToolPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                     />
                     <Box
@@ -247,7 +250,7 @@ class RootTool extends Component {
             return <Loader />;
           }}
         />
-      </>
+      </CreateRelationshipContextProvider>
     );
   }
 }

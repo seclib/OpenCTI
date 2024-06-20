@@ -22,6 +22,8 @@ import inject18n from '../../../../components/i18n';
 import withRouter from '../../../../utils/compat-router/withRouter';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
 
 const subscription = graphql`
   subscription RootChannelSubscription($id: ID!) {
@@ -88,7 +90,7 @@ class RootChannel extends Component {
     } = this.props;
     const link = `/dashboard/arsenal/channels/${channelId}/knowledge`;
     return (
-      <div>
+      <CreateRelationshipContextProvider>
         <Routes>
           <Route path="/knowledge/*"
             element= {<StixCoreObjectKnowledgeBar
@@ -129,6 +131,7 @@ class RootChannel extends Component {
                       entityType="Channel"
                       stixDomainObject={channel}
                       PopoverComponent={<ChannelPopover />}
+                      RelateComponent={CreateRelationshipButtonComponent}
                       enableQuickSubscription={true}
                     />
                     <Box
@@ -249,7 +252,7 @@ class RootChannel extends Component {
             return <Loader />;
           }}
         />
-      </div>
+      </CreateRelationshipContextProvider>
     );
   }
 }

@@ -27,6 +27,8 @@ import StixCoreObjectKnowledgeBar from '../../common/stix_core_objects/StixCoreO
 import { useFormatter } from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
 import { getCurrentTab, getPaddingRight } from '../../../../utils/utils';
+import CreateRelationshipButtonComponent from '../../common/menus/CreateRelationshipButtonComponent';
+import CreateRelationshipContextProvider from '../../common/menus/CreateRelationshipContextProvider';
 
 const subscription = graphql`
   subscription RootThreatActorIndividualSubscription($id: ID!) {
@@ -99,7 +101,7 @@ const RootThreatActorIndividualComponent = ({
   const link = `/dashboard/threats/threat_actors_individual/${data.id}/knowledge`;
   const paddingRight = getPaddingRight(location.pathname, data.id, '/dashboard/threats/threat_actors_individual');
   return (
-    <>
+    <CreateRelationshipContextProvider>
       <Routes>
         <Route
           path="/knowledge/*"
@@ -142,6 +144,7 @@ const RootThreatActorIndividualComponent = ({
               entityType="Threat-Actor-Individual"
               stixDomainObject={data}
               PopoverComponent={ThreatActorIndividualPopover}
+              RelateComponent={CreateRelationshipButtonComponent}
               enableQuickSubscription={true}
             />
             <Box
@@ -247,7 +250,7 @@ const RootThreatActorIndividualComponent = ({
           <ErrorNotFound />
         )}
       </>
-    </>
+    </CreateRelationshipContextProvider>
   );
 };
 

@@ -1,4 +1,6 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext, useEffect } from 'react';
+import useHelper from 'src/utils/hooks/useHelper';
+import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
 import useAuth from '../../../../../utils/hooks/useAuth';
 import ListLines from '../../../../../components/list_lines/ListLines';
 import { QueryRenderer } from '../../../../../relay/environment';
@@ -157,6 +159,17 @@ const EntityStixCoreRelationshipsRelationshipsView: FunctionComponent<EntityStix
   } = useEntityToggle(localStorageKey);
 
   const finalView = currentView || view;
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+  const { setState: setCreateRelationshipContext } = useContext(CreateRelationshipContext);
+  useEffect(() => {
+    setCreateRelationshipContext({
+      relationshipTypes,
+      stixCoreObjectTypes,
+      reversed: isRelationReversed,
+      paginationOptions,
+    });
+  }, []);
   return (
     <>
       <ListLines
@@ -260,19 +273,21 @@ const EntityStixCoreRelationshipsRelationshipsView: FunctionComponent<EntityStix
         variant="medium"
         type={'stix-core-relationship'}
       />
-      <Security needs={[KNOWLEDGE_KNUPDATE]}>
-        <StixCoreRelationshipCreationFromEntity
-          entityId={entityId}
-          allowedRelationshipTypes={relationshipTypes}
-          isRelationReversed={isRelationReversed}
-          targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(stixCoreObjectTypes)}
-          targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(stixCoreObjectTypes)}
-          defaultStartTime={defaultStartTime}
-          defaultStopTime={defaultStopTime}
-          paginationOptions={paginationOptions}
-          paddingRight={paddingRightButtonAdd ?? 220}
-        />
-      </Security>
+      {!FABReplaced
+        && <Security needs={[KNOWLEDGE_KNUPDATE]}>
+          <StixCoreRelationshipCreationFromEntity
+            entityId={entityId}
+            allowedRelationshipTypes={relationshipTypes}
+            isRelationReversed={isRelationReversed}
+            targetStixDomainObjectTypes={computeTargetStixDomainObjectTypes(stixCoreObjectTypes)}
+            targetStixCyberObservableTypes={computeTargetStixCyberObservableTypes(stixCoreObjectTypes)}
+            defaultStartTime={defaultStartTime}
+            defaultStopTime={defaultStopTime}
+            paginationOptions={paginationOptions}
+            paddingRight={paddingRightButtonAdd ?? 220}
+          />
+          </Security>
+      }
     </>
   );
 };

@@ -24,6 +24,7 @@
       "@components/*": ["src/private/components/*"],
       "src": ["src/*"]
     },
+    "sourceMap": true,
     "types": ["@testing-library/jest-dom"]
   },
   "include": [

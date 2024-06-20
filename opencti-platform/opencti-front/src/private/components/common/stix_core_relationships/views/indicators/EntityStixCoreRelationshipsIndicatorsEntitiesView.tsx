@@ -1,4 +1,6 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext, useEffect } from 'react';
+import useHelper from 'src/utils/hooks/useHelper';
+import { CreateRelationshipContext } from '@components/common/menus/CreateRelationshipContextProvider';
 import ListLines from '../../../../../../components/list_lines/ListLines';
 import ToolBar from '../../../../data/ToolBar';
 import useEntityToggle from '../../../../../../utils/hooks/useEntityToggle';
@@ -136,6 +138,19 @@ const EntityStixCoreRelationshipsIndicatorsEntitiesView: FunctionComponent<Entit
   } = useEntityToggle(localStorageKey);
 
   const finalView = currentView || view;
+  const stixDomainObjectTypes = ['Indicator'];
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
+  const { setState: setCreateRelationshipContext } = useContext(CreateRelationshipContext);
+  useEffect(() => {
+    setCreateRelationshipContext({
+      relationshipTypes,
+      stixCoreObjectTypes: stixDomainObjectTypes,
+      connectionKey: 'Pagination_indicators',
+      reversed: isRelationReversed,
+      paginationOptions,
+    });
+  }, []);
   return (
     <>
       <ListLines
@@ -202,20 +217,22 @@ const EntityStixCoreRelationshipsIndicatorsEntitiesView: FunctionComponent<Entit
           'Be careful, you are about to delete the selected entities (not the relationships)',
         )}
       />
-      <Security needs={[KNOWLEDGE_KNUPDATE]}>
-        <StixCoreRelationshipCreationFromEntity
-          entityId={entityId}
-          isRelationReversed={isRelationReversed}
-          targetStixDomainObjectTypes={['Indicator']}
-          allowedRelationshipTypes={relationshipTypes}
-          paginationOptions={paginationOptions}
-          openExports={openExports}
-          paddingRight={220}
-          connectionKey="Pagination_indicators"
-          defaultStartTime={defaultStartTime}
-          defaultStopTime={defaultStopTime}
-        />
-      </Security>
+      {!FABReplaced
+        && <Security needs={[KNOWLEDGE_KNUPDATE]}>
+          <StixCoreRelationshipCreationFromEntity
+            entityId={entityId}
+            isRelationReversed={isRelationReversed}
+            targetStixDomainObjectTypes={stixDomainObjectTypes}
+            allowedRelationshipTypes={relationshipTypes}
+            paginationOptions={paginationOptions}
+            openExports={openExports}
+            paddingRight={220}
+            connectionKey="Pagination_indicators"
+            defaultStartTime={defaultStartTime}
+            defaultStopTime={defaultStopTime}
+          />
+          </Security>
+      }
     </>
   );
 };
