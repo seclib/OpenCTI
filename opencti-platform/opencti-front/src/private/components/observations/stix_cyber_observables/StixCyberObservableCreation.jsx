@@ -16,7 +16,9 @@ import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import makeStyles from '@mui/styles/makeStyles';
 import { ListItemButton } from '@mui/material';
-import { commitMutation, handleErrorInForm, QueryRenderer } from '../../../../relay/environment';
+import useHelper from '../../../../utils/hooks/useHelper';
+import CreateEntityControlledDial from '../../common/menus/CreateEntityControlledDial';
+import { handleErrorInForm, QueryRenderer } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
 import SwitchField from '../../../../components/fields/SwitchField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -36,6 +38,7 @@ import useVocabularyCategory from '../../../../utils/hooks/useVocabularyCategory
 import { convertMarking } from '../../../../utils/edition';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 import useAttributes from '../../../../utils/hooks/useAttributes';
+import useApiMutation from '../../../../utils/hooks/useApiMutation';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -224,13 +227,20 @@ const StixCyberObservableCreation = ({
 }) => {
   const classes = useStyles();
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
   const { isVocabularyField, fieldToCategory } = useVocabularyCategory();
   const { booleanAttributes, dateAttributes, multipleAttributes, numberAttributes, ignoredAttributes } = useAttributes();
   const [status, setStatus] = useState({ open: false, type: type ?? null });
+  const [commit] = useApiMutation(
+    stixCyberObservableMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Observable')} ${t_i18n('successfully created')}` },
+  );
 
   const handleOpen = () => setStatus({ open: true, type: status.type });
   const localHandleClose = () => setStatus({ open: false, type: type ?? null });
   const selectType = (selected) => setStatus({ open: status.open, type: selected });
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
 
   const onSubmit = (values, { setSubmitting, setErrors, resetForm }) => {
     let adaptedValues = values;
@@ -311,8 +321,7 @@ const StixCyberObservableCreation = ({
     if (values.file) {
       finalValues.file = values.file;
     }
-    commitMutation({
-      mutation: stixCyberObservableMutation,
+    commit({
       variables: finalValues,
       updater: (store) => insertNode(
         store,
@@ -324,7 +333,6 @@ const StixCyberObservableCreation = ({
         handleErrorInForm(error, setErrors);
         setSubmitting(false);
       },
-      setSubmitting,
       onCompleted: () => {
         setSubmitting(false);
         resetForm();
@@ -645,14 +653,16 @@ const StixCyberObservableCreation = ({
   const renderClassic = () => {
     return (
       <>
-        <Fab
-          onClick={handleOpen}
-          color="primary"
-          aria-label="Add"
-          className={classes.createButton}
-        >
-          <Add />
-        </Fab>
+        {FABReplaced
+          ? CreateEntityControlledDial('entity_Observable')({ onOpen: handleOpen })
+          : <Fab
+              onClick={handleOpen}
+              color="primary"
+              aria-label="Add"
+              className={classes.createButton}
+            >
+            <Add />
+          </Fab>}
         <Drawer
           open={status.open}
           anchor="right"

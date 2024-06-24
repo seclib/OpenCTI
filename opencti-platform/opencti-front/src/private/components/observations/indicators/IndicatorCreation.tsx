@@ -12,6 +12,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -147,7 +149,11 @@ export const IndicatorCreationForm: FunctionComponent<IndicatorFormProps> = ({
     basicShape,
   );
 
-  const [commit] = useApiMutation<IndicatorCreationMutation>(indicatorMutation);
+  const [commit] = useApiMutation<IndicatorCreationMutation>(
+    indicatorMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Indicator')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<IndicatorAddInput>['onSubmit'] = (values, { setSubmitting, setErrors, resetForm }) => {
     const input: IndicatorCreationMutation$variables['input'] = {
@@ -392,11 +398,13 @@ interface IndicatorCreationProps {
 
 const IndicatorCreation: FunctionComponent<IndicatorCreationProps> = ({ paginationOptions, contextual, display }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const onReset = () => handleClose();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
 
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
@@ -438,7 +446,8 @@ const IndicatorCreation: FunctionComponent<IndicatorCreationProps> = ({ paginati
   return (
     <Drawer
       title={t_i18n('Create an indicator')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Indicator') : undefined}
     >
       {({ onClose }) => (
         <IndicatorCreationForm
