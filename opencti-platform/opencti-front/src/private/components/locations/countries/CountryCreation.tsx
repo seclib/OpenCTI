@@ -9,6 +9,9 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import CustomFileUploader from '@components/common/files/CustomFileUploader';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import { handleErrorInForm } from 'src/relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -93,10 +96,14 @@ export const CountryCreationForm: FunctionComponent<CountryFormProps> = ({
     COUNTRY_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation<CountryCreationMutation>(countryMutation);
+  const [commit] = useApiMutation<CountryCreationMutation>(
+    countryMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Country')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<CountryAddInput>['onSubmit'] = (
     values,
-    { setSubmitting, resetForm },
+    { setSubmitting, resetForm, setErrors },
   ) => {
     const input: CountryCreationMutation$variables['input'] = {
       name: values.name,
@@ -116,6 +123,10 @@ export const CountryCreationForm: FunctionComponent<CountryFormProps> = ({
         if (updater) {
           updater(store, 'countryAdd');
         }
+      },
+      onError: (error: Error) => {
+        handleErrorInForm(error, setErrors);
+        setSubmitting(false);
       },
       onCompleted: () => {
         setSubmitting(false);
@@ -226,11 +237,14 @@ const CountryCreation = ({
   paginationOptions: CountriesLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_countries', paginationOptions, 'countryAdd');
   return (
     <Drawer
       title={t_i18n('Create a country')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Country') : undefined}
     >
       {({ onClose }) => (
         <CountryCreationForm

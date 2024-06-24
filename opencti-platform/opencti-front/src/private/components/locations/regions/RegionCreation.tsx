@@ -9,6 +9,9 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import CustomFileUploader from '@components/common/files/CustomFileUploader';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import { handleErrorInForm } from 'src/relay/environment';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -91,11 +94,15 @@ export const RegionCreationForm: FunctionComponent<RegionFormProps> = ({
     confidence: Yup.number().nullable(),
   };
   const regionValidator = useSchemaCreationValidation(REGION_TYPE, basicShape);
-  const [commit] = useApiMutation(regionMutation);
+  const [commit] = useApiMutation(
+    regionMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Region')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<RegionAddInput>['onSubmit'] = (
     values,
-    { setSubmitting, resetForm },
+    { setSubmitting, resetForm, setErrors },
   ) => {
     const input: RegionCreationMutation$variables['input'] = {
       name: values.name,
@@ -115,6 +122,10 @@ export const RegionCreationForm: FunctionComponent<RegionFormProps> = ({
         if (updater) {
           updater(store, 'regionAdd');
         }
+      },
+      onError: (error: Error) => {
+        handleErrorInForm(error, setErrors);
+        setSubmitting(false);
       },
       onCompleted: () => {
         setSubmitting(false);
@@ -226,11 +237,14 @@ const RegionCreation = ({
   paginationOptions: RegionsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_regions', paginationOptions, 'regionAdd');
   return (
     <Drawer
       title={t_i18n('Create a region')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Region') : undefined}
     >
       {({ onClose }) => (
         <RegionCreationForm

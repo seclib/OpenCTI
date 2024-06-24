@@ -8,6 +8,9 @@ import { FormikConfig } from 'formik/dist/types';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import { handleErrorInForm } from 'src/relay/environment';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
 import CreatedByField from '../../common/form/CreatedByField';
@@ -104,10 +107,14 @@ export const AdministrativeAreaCreationForm: FunctionComponent<AdministrativeAre
     ADMINISTRATIVE_AREA_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation(administrativeAreaMutation);
+  const [commit] = useApiMutation(
+    administrativeAreaMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Administrative-Area')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<AdministrativeAreaAddInput>['onSubmit'] = (
     values,
-    { setSubmitting, resetForm },
+    { setSubmitting, resetForm, setErrors },
   ) => {
     const input: AdministrativeAreaCreationMutation$variables['input'] = {
       name: values.name,
@@ -129,6 +136,10 @@ export const AdministrativeAreaCreationForm: FunctionComponent<AdministrativeAre
         if (updater) {
           updater(store, 'administrativeAreaAdd');
         }
+      },
+      onError: (error: Error) => {
+        handleErrorInForm(error, setErrors);
+        setSubmitting(false);
       },
       onCompleted: () => {
         setSubmitting(false);
@@ -254,6 +265,8 @@ const AdministrativeAreaCreation = ({
   paginationOptions: AdministrativeAreasLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => {
     insertNode(
       store,
@@ -265,7 +278,8 @@ const AdministrativeAreaCreation = ({
   return (
     <Drawer
       title={t_i18n('Create an area')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Administrative-Area') : undefined}
     >
       {({ onClose }) => (
         <AdministrativeAreaCreationForm
