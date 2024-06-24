@@ -11,6 +11,7 @@ import { ContainerStixCyberObservablesLines_container$key } from './__generated_
 import { KNOWLEDGE_KNUPDATE } from '../../../../utils/hooks/useGranted';
 import { UseLocalStorageHelpers } from '../../../../utils/hooks/useLocalStorage';
 import { ContainerStixCyberObservableLine_node$data } from './__generated__/ContainerStixCyberObservableLine_node.graphql';
+import useHelper from '../../../../utils/hooks/useHelper';
 
 const nbOfRowsToLoad = 50;
 
@@ -142,6 +143,8 @@ ContainerStixCyberObservablesLinesProps
   setSelectedElements,
   enableReferences,
 }) => {
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const { data, hasMore, loadMore, isLoadingMore } = usePreloadedPaginationFragment<
   ContainerStixCyberObservablesLinesQuery,
   ContainerStixCyberObservablesLines_container$key
@@ -179,7 +182,7 @@ ContainerStixCyberObservablesLinesProps
         selectAll={selectAll}
         onToggleEntity={onToggleEntity}
       />
-      {data?.container && (
+      {!FABReplaced && data?.container && (
         <Security needs={[KNOWLEDGE_KNUPDATE]}>
           <ContainerAddStixCoreObjects
             containerId={data?.container.id}

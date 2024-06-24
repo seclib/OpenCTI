@@ -43,7 +43,6 @@ import Button from '@mui/material/Button';
 import Slide from '@mui/material/Slide';
 import StixNestedRefRelationshipCreationFromKnowledgeGraph from '../../common/stix_nested_ref_relationships/StixNestedRefRelationshipCreationFromKnowledgeGraph';
 import inject18n from '../../../../components/i18n';
-import ContainerAddStixCoreObjects from '../../common/containers/ContainerAddStixCoreObjects';
 import StixCoreRelationshipCreation from '../../common/stix_core_relationships/StixCoreRelationshipCreation';
 import { dateFormat } from '../../../../utils/Time';
 import { truncate } from '../../../../utils/String';
@@ -59,6 +58,7 @@ import StixCyberObservableEdition from '../../observations/stix_cyber_observable
 import { isStixNestedRefRelationship } from '../../../../utils/Relation';
 import { convertCreatedBy, convertMarkings } from '../../../../utils/edition';
 import { UserContext } from '../../../../utils/hooks/useAuth';
+import ContainerAddStixCoreObjectsInGraph from '../../common/containers/ContainerAddStixCoreObjectsInGraph';
 
 const styles = () => ({
   bottomNav: {
@@ -865,7 +865,7 @@ class ReportKnowledgeGraphBar extends Component {
                     style={{ float: 'right', display: 'flex', height: '100%' }}
                   >
                     {onAdd && (
-                      <ContainerAddStixCoreObjects
+                      <ContainerAddStixCoreObjectsInGraph
                         containerId={report.id}
                         containerStixCoreObjects={report.objects.edges}
                         knowledgeGraph={true}
