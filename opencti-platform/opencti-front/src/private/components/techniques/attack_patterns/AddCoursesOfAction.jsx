@@ -4,6 +4,7 @@ import { compose } from 'ramda';
 import withStyles from '@mui/styles/withStyles';
 import IconButton from '@mui/material/IconButton';
 import { Add } from '@mui/icons-material';
+import { styled } from '@mui/material';
 import Drawer from '../../common/drawer/Drawer';
 import inject18n from '../../../../components/i18n';
 import SearchInput from '../../../../components/SearchInput';
@@ -29,10 +30,6 @@ const styles = (theme) => ({
   title: {
     float: 'left',
   },
-  search: {
-    marginLeft: 'auto',
-    marginRight: ' 20px',
-  },
   header: {
     backgroundColor: theme.palette.background.nav,
     padding: '20px 20px 20px 60px',
@@ -55,6 +52,14 @@ const styles = (theme) => ({
     width: 24,
     height: 24,
   },
+});
+
+const StyledSearchHeader = styled('div')({
+  marginLeft: 'auto',
+  marginRight: '20px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
 });
 
 class AddCoursesOfAction extends Component {
@@ -96,12 +101,18 @@ class AddCoursesOfAction extends Component {
           onClose={this.handleClose.bind(this)}
           title={t('Add courses of action')}
           header={(
-            <div className={classes.search}>
+            <StyledSearchHeader>
               <SearchInput
                 variant="inDrawer"
                 onSubmit={this.handleSearch.bind(this)}
               />
-            </div>
+              <CourseOfActionCreation
+                display={this.state.open}
+                contextual={true}
+                inputValue={this.state.search}
+                paginationOptions={paginationOptions}
+              />
+            </StyledSearchHeader>
           )}
         >
           <QueryRenderer
@@ -121,12 +132,6 @@ class AddCoursesOfAction extends Component {
             }}
           />
         </Drawer>
-        <CourseOfActionCreation
-          display={this.state.open}
-          contextual={true}
-          inputValue={this.state.search}
-          paginationOptions={paginationOptions}
-        />
       </>
     );
   }

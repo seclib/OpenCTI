@@ -7,10 +7,12 @@ import { Add } from '@mui/icons-material';
 import * as Yup from 'yup';
 import { graphql } from 'react-relay';
 import { FormikConfig, FormikHelpers } from 'formik/dist/types';
-import { Dialog, DialogContent } from '@mui/material';
+import { Dialog, DialogContent, styled } from '@mui/material';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import DialogTitle from '@mui/material/DialogTitle';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -53,6 +55,10 @@ const useStyles = makeStyles<Theme>((theme) => ({
     marginLeft: theme.spacing(2),
   },
 }));
+
+const ContextualDataComponentCreationButton = styled('div')({
+  marginTop: '5px',
+});
 
 const dataComponentMutation = graphql`
   mutation DataComponentCreationMutation($input: DataComponentAddInput!) {
@@ -116,7 +122,11 @@ export const DataComponentCreationForm: FunctionComponent<DataComponentFormProps
     basicShape,
   );
 
-  const [commit] = useApiMutation(dataComponentMutation);
+  const [commit] = useApiMutation(
+    dataComponentMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Data-Component')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<DataComponentAddInput>['onSubmit'] = (
     values: DataComponentAddInput,
     {
@@ -280,7 +290,8 @@ const DataComponentCreation: FunctionComponent<{
 }) => {
   const { t_i18n } = useFormatter();
   const classes = useStyles();
-
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACED');
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -294,7 +305,8 @@ const DataComponentCreation: FunctionComponent<{
   const renderClassic = () => (
     <Drawer
       title={t_i18n('Create a data component')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Data-Component') : undefined}
     >
       {({ onClose }) => (
         <DataComponentCreationForm
@@ -309,14 +321,19 @@ const DataComponentCreation: FunctionComponent<{
 
   const renderContextual = () => (
     <div style={{ display: display ? 'block' : 'none' }}>
-      <Fab
-        onClick={handleOpen}
-        color="secondary"
-        aria-label="Add"
-        className={classes.createButtonContextual}
-      >
-        <Add />
-      </Fab>
+      {FABReplaced
+        ? <ContextualDataComponentCreationButton>
+          {CreateEntityControlledDial('entity_Data-Component')({ onOpen: handleOpen })}
+        </ContextualDataComponentCreationButton>
+        : <Fab
+            onClick={handleOpen}
+            color="secondary"
+            aria-label="Add"
+            className={classes.createButtonContextual}
+          >
+          <Add />
+        </Fab>
+      }
       <Dialog open={open} onClose={handleClose} PaperProps={{ elevation: 1 }}>
         <DialogTitle>{t_i18n('Create a data component')}</DialogTitle>
         <DialogContent>
