@@ -8,6 +8,8 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -99,7 +101,11 @@ export const IndividualCreationForm: FunctionComponent<IndividualFormProps> = ({
   };
   const individualValidator = useSchemaCreationValidation(INDIVIDUAL_TYPE, basicShape);
 
-  const [commit] = useApiMutation<IndividualCreationMutation>(individualMutation);
+  const [commit] = useApiMutation<IndividualCreationMutation>(
+    individualMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Individual')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<IndividualAddInput>['onSubmit'] = (values, {
     setSubmitting,
@@ -249,7 +255,8 @@ const IndividualCreation = ({ paginationOptions }: {
   paginationOptions: IndividualsLinesPaginationQuery$variables
 }) => {
   const { t_i18n } = useFormatter();
-
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_individuals',
@@ -260,7 +267,8 @@ const IndividualCreation = ({ paginationOptions }: {
   return (
     <Drawer
       title={t_i18n('Create a individual')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Individual') : undefined}
     >
       {({ onClose }) => (
         <IndividualCreationForm

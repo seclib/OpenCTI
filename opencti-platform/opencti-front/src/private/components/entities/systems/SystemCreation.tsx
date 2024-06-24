@@ -8,6 +8,8 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -100,7 +102,11 @@ export const SystemCreationForm: FunctionComponent<SystemFormProps> = ({
   };
   const systemValidator = useSchemaCreationValidation(SYSTEM_TYPE, basicShape);
 
-  const [commit] = useApiMutation<SystemCreationMutation>(systemMutation);
+  const [commit] = useApiMutation<SystemCreationMutation>(
+    systemMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_System')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<SystemAddInput>['onSubmit'] = (
     values,
@@ -257,12 +263,15 @@ const SystemCreation = ({
   paginationOptions: SystemsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_systems', paginationOptions, 'systemAdd');
 
   return (
     <Drawer
       title={t_i18n('Create a system')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_System') : undefined}
     >
       {({ onClose }) => (
         <SystemCreationForm

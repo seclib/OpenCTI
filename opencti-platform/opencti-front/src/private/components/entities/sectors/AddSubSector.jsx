@@ -4,6 +4,7 @@ import { compose } from 'ramda';
 import withStyles from '@mui/styles/withStyles';
 import IconButton from '@mui/material/IconButton';
 import { Add } from '@mui/icons-material';
+import { styled } from '@mui/material';
 import Drawer from '../../common/drawer/Drawer';
 import inject18n from '../../../../components/i18n';
 import { QueryRenderer } from '../../../../relay/environment';
@@ -56,6 +57,10 @@ const styles = (theme) => ({
   },
 });
 
+const CreateSectorButton = styled('div')({
+  float: 'right',
+});
+
 class AddSubSector extends Component {
   constructor(props) {
     super(props);
@@ -96,11 +101,21 @@ class AddSubSector extends Component {
           onClose={this.handleClose.bind(this)}
         >
           <>
-            <SearchInput
-              variant="small"
-              onSubmit={this.handleSearch.bind(this)}
-              keyword={this.state.search}
-            />
+            <div>
+              <SearchInput
+                variant="small"
+                onSubmit={this.handleSearch.bind(this)}
+                keyword={this.state.search}
+              />
+              <CreateSectorButton>
+                <SectorCreation
+                  display={this.state.open}
+                  contextual={true}
+                  inputValue={this.state.search}
+                  paginationOptions={paginationOptions}
+                />
+              </CreateSectorButton>
+            </div>
             <QueryRenderer
               query={addSubSectorsLinesQuery}
               variables={{
@@ -116,12 +131,6 @@ class AddSubSector extends Component {
                   />
                 );
               }}
-            />
-            <SectorCreation
-              display={this.state.open}
-              contextual={true}
-              inputValue={this.state.search}
-              paginationOptions={paginationOptions}
             />
           </>
         </Drawer>

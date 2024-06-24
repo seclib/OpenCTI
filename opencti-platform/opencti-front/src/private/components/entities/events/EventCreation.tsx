@@ -8,6 +8,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import useHelper from 'src/utils/hooks/useHelper';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -107,7 +109,11 @@ export const EventCreationForm: FunctionComponent<EventFormProps> = ({
   };
   const eventValidator = useSchemaCreationValidation(EVENT_TYPE, basicShape);
 
-  const [commit] = useApiMutation<EventCreationMutation>(eventMutation);
+  const [commit] = useApiMutation<EventCreationMutation>(
+    eventMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Event')} ${t_i18n('successfully created')}` },
+  );
 
   const onSubmit: FormikConfig<EventAddInput>['onSubmit'] = (
     values,
@@ -275,11 +281,14 @@ const EventCreation = ({
   paginationOptions: EventsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_events', paginationOptions, 'eventAdd');
   return (
     <Drawer
       title={t_i18n('Create an event')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Event') : undefined}
     >
       {({ onClose }) => (
         <EventCreationForm

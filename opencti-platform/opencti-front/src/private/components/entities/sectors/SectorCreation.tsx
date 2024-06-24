@@ -8,6 +8,8 @@ import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
 import ConfidenceField from '@components/common/form/ConfidenceField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -117,7 +119,11 @@ export const SectorCreationForm: FunctionComponent<SectorFormProps> = ({
   };
   const sectorValidator = useSchemaCreationValidation(SECTOR_TYPE, basicShape);
 
-  const [commit] = useApiMutation<SectorCreationMutation>(sectorMutation);
+  const [commit] = useApiMutation<SectorCreationMutation>(
+    sectorMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Sector')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<SectorAddInput>['onSubmit'] = (
     values,
     {
@@ -263,11 +269,14 @@ const SectorCreation = ({
   paginationOptions: SectorsLinesPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_sectors', paginationOptions, 'sectorAdd');
   return (
     <Drawer
       title={t_i18n('Create a sector')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Sector') : undefined}
     >
       {({ onClose }) => (
         <SectorCreationForm
