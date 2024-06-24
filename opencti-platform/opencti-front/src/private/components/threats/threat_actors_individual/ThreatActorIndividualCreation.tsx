@@ -13,6 +13,8 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import CountryField from '@components/common/form/CountryField';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -203,6 +205,8 @@ ThreatActorIndividualFormProps
   );
   const [commit] = useApiMutation<ThreatActorIndividualCreationMutation>(
     ThreatActorIndividualMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Threat-Actor-Individual')} ${t_i18n('successfully created')}` },
   );
 
   const onSubmit: FormikConfig<ThreatActorIndividualAddInput>['onSubmit'] = (
@@ -604,6 +608,8 @@ const ThreatActorIndividualCreation = ({
   paginationOptions: ThreatActorsIndividualCardsPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_threatActorsIndividuals',
@@ -613,7 +619,8 @@ const ThreatActorIndividualCreation = ({
   return (
     <Drawer
       title={t_i18n('Create a threat actor individual')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Threat-Actor-Individual') : undefined}
     >
       {({ onClose }) => (
         <ThreatActorIndividualCreationForm

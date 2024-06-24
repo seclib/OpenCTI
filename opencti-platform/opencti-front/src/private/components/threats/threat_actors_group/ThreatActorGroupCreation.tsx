@@ -7,6 +7,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
+import useHelper from 'src/utils/hooks/useHelper';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -102,6 +104,8 @@ ThreatActorGroupFormProps
 
   const [commit] = useApiMutation<ThreatActorGroupCreationMutation>(
     ThreatActorGroupMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Threat-Actor-Group')} ${t_i18n('successfully created')}` },
   );
 
   const onSubmit: FormikConfig<ThreatActorGroupAddInput>['onSubmit'] = (
@@ -252,6 +256,8 @@ const ThreatActorGroupCreation = ({
   paginationOptions: ThreatActorsGroupCardsPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_threatActorsGroup',
@@ -261,7 +267,8 @@ const ThreatActorGroupCreation = ({
   return (
     <Drawer
       title={t_i18n('Create a threat actor group')}
-      variant={DrawerVariant.create}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Threat-Actor-Group') : undefined}
     >
       {({ onClose }) => (
         <ThreatActorGroupCreationForm

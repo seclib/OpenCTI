@@ -7,6 +7,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import useHelper from 'src/utils/hooks/useHelper';
+import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -97,7 +99,11 @@ IntrusionSetFormProps
     INTRUSION_SET_TYPE,
     basicShape,
   );
-  const [commit] = useApiMutation<IntrusionSetCreationMutation>(intrusionSetMutation);
+  const [commit] = useApiMutation<IntrusionSetCreationMutation>(
+    intrusionSetMutation,
+    undefined,
+    { successMessage: `${t_i18n('entity_Intrusion-Set')} ${t_i18n('successfully created')}` },
+  );
   const onSubmit: FormikConfig<IntrusionSetAddInput>['onSubmit'] = (
     values,
     { setSubmitting, setErrors, resetForm },
@@ -235,6 +241,8 @@ const IntrusionSetCreation = ({
   paginationOptions: IntrusionSetsCardsPaginationQuery$variables;
 }) => {
   const { t_i18n } = useFormatter();
+  const { isFeatureEnable } = useHelper();
+  const FABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_intrusionSets',
@@ -242,7 +250,11 @@ const IntrusionSetCreation = ({
     'intrusionSetAdd',
   );
   return (
-    <Drawer title={t_i18n('Create an intrusion set')} variant={DrawerVariant.create}>
+    <Drawer
+      title={t_i18n('Create an intrusion set')}
+      variant={FABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={FABReplaced ? CreateEntityControlledDial('entity_Intrusion-Set') : undefined}
+    >
       {({ onClose }) => (
         <IntrusionSetCreationForm
           updater={updater}
