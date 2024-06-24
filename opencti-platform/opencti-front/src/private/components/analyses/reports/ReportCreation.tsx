@@ -340,7 +340,7 @@ const ReportCreation = ({
 }) => {
   const { t_i18n } = useFormatter();
   const { isFeatureEnable } = useHelper();
-  const FAB_REPLACED = isFeatureEnable('FAB_REPLACEMENT');
+  const isFABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_reports',
@@ -350,8 +350,8 @@ const ReportCreation = ({
   return (
     <Drawer
       title={t_i18n('Create a report')}
-      variant={FAB_REPLACED ? undefined : DrawerVariant.create}
-      controlledDial={FAB_REPLACED ? CreateEntityControlledDial('entity_Report') : undefined}
+      variant={isFABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={isFABReplaced ? CreateEntityControlledDial('entity_Report') : undefined}
     >
       <ReportCreationForm updater={updater} />
     </Drawer>
