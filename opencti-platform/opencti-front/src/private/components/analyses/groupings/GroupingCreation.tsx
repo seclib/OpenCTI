@@ -301,7 +301,7 @@ const GroupingCreation = ({
   const isFABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(store, 'Pagination_groupings', paginationOptions, 'groupingAdd');
   const CreateGroupingControlledDial = (props: DrawerControlledDialProps) => (
-    <CreateEntityControlledDial entityType='entity_Grouping' {...props} />
+    <CreateEntityControlledDial entityType='Grouping' {...props} />
   );
   return (
     <Drawer
