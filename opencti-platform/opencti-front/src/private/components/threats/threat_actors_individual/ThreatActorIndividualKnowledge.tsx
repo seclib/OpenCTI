@@ -71,7 +71,6 @@ const ThreatActorIndividualKnowledgeComponent = ({
           element={
             <EntityStixCoreRelationships
               entityId={threatActorIndividual.id}
-              relationshipTypes={['related-to', 'part-of']}
               entityLink={link}
               defaultStartTime={threatActorIndividual.first_seen}
               defaultStopTime={threatActorIndividual.last_seen}
@@ -226,7 +225,7 @@ const ThreatActorIndividualKnowledgeComponent = ({
           element={
             <EntityStixCoreRelationships
               entityId={threatActorIndividual.id}
-              relationshipTypes={['employed-by']}
+              relationshipTypes={['employed-by', 'impersonates']}
               stixCoreObjectTypes={['Organization']}
               entityLink={link}
               defaultStartTime={threatActorIndividual.first_seen}

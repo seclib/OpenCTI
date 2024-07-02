@@ -461,6 +461,10 @@ const StixCyberObservableDetails = createFragmentContainer(
           url
           publication_date
         }
+        ... on Persona {
+          persona_name
+          persona_type
+        }
         ...StixCyberObservableIndicators_stixCyberObservable
       }
     `,
