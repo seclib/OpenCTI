@@ -8,6 +8,8 @@ import { KNOWLEDGE_KNUPDATE } from '../../../../utils/hooks/useGranted';
 import { NoteEditionContainerQuery$data } from './__generated__/NoteEditionContainerQuery.graphql';
 import { CollaborativeSecurity } from '../../../../utils/Security';
 import useApiMutation from '../../../../utils/hooks/useApiMutation';
+import { DrawerControlledDialProps } from '../../common/drawer/Drawer';
+import EditEntityControlledDial from '../../../../components/EditEntityControlledDial';
 
 export const noteEditionQuery = graphql`
   query NoteEditionContainerQuery($id: String!) {
@@ -32,6 +34,10 @@ const NoteEdition = ({ noteId }: { noteId: string }) => {
     });
   };
 
+  const EditNoteControlledDial = (props: DrawerControlledDialProps) => (
+    <EditEntityControlledDial size='medium' {...props} />
+  );
+
   return (
     <div>
       <QueryRenderer
@@ -47,6 +53,7 @@ const NoteEdition = ({ noteId }: { noteId: string }) => {
                 <NoteEditionContainer
                   note={props.note}
                   handleClose={handleClose}
+                  controlledDial={EditNoteControlledDial}
                 />
               </CollaborativeSecurity>
             );
