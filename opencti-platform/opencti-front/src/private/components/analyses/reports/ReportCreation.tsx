@@ -7,9 +7,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { FormikConfig } from 'formik/dist/types';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { useNavigate } from 'react-router-dom';
-import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import Drawer, { DrawerControlledDialProps, DrawerVariant } from '@components/common/drawer/Drawer';
 import useHelper from 'src/utils/hooks/useHelper';
-import CreateEntityControlledDial from '@components/common/menus/CreateEntityControlledDial';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
 import TextField from '../../../../components/TextField';
@@ -34,6 +33,7 @@ import RichTextField from '../../../../components/fields/RichTextField';
 import ObjectParticipantField from '../../common/form/ObjectParticipantField';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 import useApiMutation from '../../../../utils/hooks/useApiMutation';
+import CreateEntityControlledDial from '../../../../components/CreateEntityControlledDial';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -332,18 +332,21 @@ const ReportCreation = ({
 }) => {
   const { t_i18n } = useFormatter();
   const { isFeatureEnable } = useHelper();
-  const FAB_REPLACED = isFeatureEnable('FAB_REPLACEMENT');
+  const isFABReplaced = isFeatureEnable('FAB_REPLACEMENT');
   const updater = (store: RecordSourceSelectorProxy) => insertNode(
     store,
     'Pagination_reports',
     paginationOptions,
     'reportAdd',
   );
+  const CreateReportControlledDial = (props: DrawerControlledDialProps) => (
+    <CreateEntityControlledDial entityType='Report' {...props} />
+  );
   return (
     <Drawer
       title={t_i18n('Create a report')}
-      variant={FAB_REPLACED ? undefined : DrawerVariant.create}
-      controlledDial={FAB_REPLACED ? CreateEntityControlledDial('entity_Report') : undefined}
+      variant={isFABReplaced ? undefined : DrawerVariant.create}
+      controlledDial={isFABReplaced ? CreateReportControlledDial : undefined}
     >
       <ReportCreationForm updater={updater} />
     </Drawer>
